@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookstore Demo</title>
+    <script src="./scripts/home.js" defer></script>
+    <link rel="stylesheet" href="./styles/home.css">
+</head>
+<body>
+
+    <header>
+        <div class="container">
+            <h1>New Capital's Bookstore</h1>
+            <p>ITI - Node.js Project - PHP Track (Group 2)</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="book-grid" id="bookGrid">
+            </div>
+    </main>
+
+    <div class="modal-overlay" id="bookModal">
+        <div class="modal-content">
+            <span class="modal-close-btn" id="closeModalBtn">&times;</span>
+            <div class="modal-cover">
+                <img id="modalBookCover" src="" alt="Book Cover">
+            </div>
+            <div class="modal-info">
+                <h2 id="modalBookTitle"></h2>
+                <p>by <strong id="modalBookAuthor"></strong></p>
+                <p id="modalBookDescription"></p>
+                <a id="modalDirectLink" href="#" class="direct-link-btn" target="_blank" rel="noopener noreferrer">Get This Book</a>
+                <a id="modalAddToCart" href="#" class="add-to-cart-btn" target="_blank" rel="noopener noreferrer">Add to cart</a>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

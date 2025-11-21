@@ -1,0 +1,2004 @@
+openapi: 3.0.0
+info:
+  title: Bookstore API
+  version: 1.0.0
+  description: API documentation for the online e-book store. Manages users, authentication, books, reviews, cart, orders, and payments.
+servers:
+  - url: http://18.184.165.152:3000
+    description: API Server
+tags:
+  - name: Auth
+    description: User registration, login, logout, and password management.
+  - name: Profile
+    description: User profile management (get, update, delete).
+  - name: Books
+    description: Browse, search, and manage book listings.
+  - name: Authors
+    description: Manage book authors.
+  - name: Categories
+    description: Manage book categories.
+  - name: Reviews
+    description: Manage reviews for books.
+  - name: Cart
+    description: User-specific shopping cart management.
+  - name: Orders
+    description: User and Admin management of orders.
+  - name: Payments
+    description: Payment processing via Stripe.
+  - name: Upload
+    description: (Admin/Author) File uploads for books (images, PDFs).
+  - name: Download
+    description: (User) Download purchased books.
+  - name: Chat
+    description: AI-powered chat assistant.
+  - name: Webhooks
+    description: Incoming webhooks from third-party services (e.g., Stripe).
+
+# 1. Define Security
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  
+  # 2. Define Reusable Schemas (from Models)
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          description: User ID
+          example: 68eae7202ed3f81131f64f90
+        name:
+          type: string
+          example: Jane Doe
+        email:
+          type: string
+          format: email
+          example: jane.doe@example.com
+        role:
+          type: string
+          enum: [user, admin]
+          example: user
+        isVerified:
+          type: boolean
+        addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/Address'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    Address:
+      type: object
+      properties:
+        label:
+          type: string
+          example: Home
+        fullName:
+          type: string
+          example: Jane Doe
+        phone:
+          type: string
+          example: "+20123456789"
+        line1:
+          type: string
+          example: 123 Main St
+        line2:
+          type: string
+          example: Apt 4B
+        city:
+          type: string
+          example: Cairo
+        state:
+          type: string
+          example: Cairo
+        country:
+          type: string
+          example: Egypt
+        postalCode:
+          type: string
+          example: "11511"
+        isDefault:
+          type: boolean
+    Book:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 68ece8d94f8441ee8f486882
+        title:
+          type: string
+          example: The Art of Programming
+        description:
+          type: string
+        price:
+          type: number
+          format: float
+          example: 150
+        stock:
+          type: number
+          format: integer
+          example: 100
+        reserved:
+          type: number
+          format: integer
+          example: 5
+        ratingAvg:
+          type: number
+          format: float
+          example: 4.5
+        ratingCount:
+          type: number
+          format: integer
+          example: 25
+        image:
+          type: object
+          properties:
+            url:
+              type: string
+              format: uri
+        pdfUrl:
+          type: string
+          format: uri
+        authors:
+          type: array
+          items:
+            type: string
+            description: Author ID
+        categories:
+          type: array
+          items:
+            type: string
+            description: Category ID
+        isActive:
+          type: boolean
+    Author:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 68fa2432b05cf7ddb8a12345
+        userId:
+          type: string
+          description: The user account this author profile is linked to
+          example: 68f41c446885fac533ebc3cf
+        name:
+          type: string
+          example: John Smith
+          description: Public facing author name
+        bio:
+          type: string
+          example: Bestselling author of...
+        status:
+          type: string
+          enum: [pending, approved, rejected, revoked]
+          example: approved
+        appliedAt:
+          type: string
+          format: date-time
+        approvedAt:
+          type: string
+          format: date-time
+        rejectedAt:
+          type: string
+          format: date-time
+        reason:
+          type: string
+          description: Reason for rejection or revocation
+          example: Application incomplete.
+    Category:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+          example: Programming
+        slug:
+          type: string
+          example: programming
+    Review:
+      type: object
+      properties:
+        _id:
+          type: string
+        userId:
+          $ref: '#/components/schemas/User'
+        bookId:
+          type: string
+        rating:
+          type: number
+          format: integer
+          minimum: 1
+          maximum: 5
+        review:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    Cart:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 67abc123def456789
+        userId:
+          type: string
+          example: 68eae7202ed3f81131f64f90
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartItem'
+        totals:
+          type: object
+          properties:
+            subTotal:
+              type: number
+              example: 300
+    CartItem:
+      type: object
+      properties:
+        bookId:
+          type: string
+          example: 68ece8d94f8441ee8f486882
+        qty:
+          type: number
+          format: integer
+          example: 2
+        priceAtAdd:
+          type: number
+          example: 150
+    Order:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 68fa2432b05cf7ddb8a12345
+        userId:
+          type: string
+          example: 68f41c446885fac533ebc3cf
+        status:
+          type: string
+          enum: [pending, paid, processing, confirmed, shipped, delivered, cancelled, refunded]
+          example: pending
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartItem'
+        shippingAddress:
+          $ref: '#/components/schemas/Address'
+        payment:
+          type: object
+          properties:
+            method:
+              type: string
+              example: cash
+            status:
+              type: string
+              example: unpaid
+            txId:
+              type: string
+        amounts:
+          type: object
+          properties:
+            itemsTotal:
+              type: number
+              example: 600
+            shipping:
+              type: number
+              example: 30
+            discount:
+              type: number
+              example: 0
+            grandTotal:
+              type: number
+              example: 630
+        currency:
+          type: string
+          example: EGP
+        placedAt:
+          type: string
+          format: date-time
+    
+    # --- Request Body Schemas ---
+    RegisterRequest:
+      type: object
+      required: [FirstName, LastName, email, password, confirmPassword]
+      properties:
+        FirstName:
+          type: string
+          example: Ali
+        LastName:
+          type: string
+          example: ITI
+        email:
+          type: string
+          format: email
+          example: email@example.com
+        password:
+          type: string
+          format: password
+          example: Mypass12345@iti
+        confirmPassword:
+          type: string
+          format: password
+          example: Mypass12345@iti
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          example: email@example.com
+        password:
+          type: string
+          format: password
+          example: Mypass12345@iti
+    LoginResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Login successful
+        token:
+          type: string
+          example: eyJhbGciOiJIUzI1Ni...
+        user:
+          $ref: '#/components/schemas/User'
+    ForgotPasswordRequest:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
+    ResetPasswordRequest:
+      type: object
+      required: [password]
+      properties:
+        password:
+          type: string
+          format: password
+          example: NewStr0ngP@ss!
+    ChangePasswordRequest:
+      type: object
+      required: [old_password, new_password]
+      properties:
+        old_password:
+          type: string
+          format: password
+        new_password:
+          type: string
+          format: password
+    UpdateProfileRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Jane A. Doe
+        email:
+          type: string
+          format: email
+          example: jane.a.doe@example.com
+    DeleteAccountRequest:
+      type: object
+      required: [password]
+      properties:
+        password:
+          type: string
+          format: password
+    AuthorApplyRequest:
+      type: object
+      required: [name, bio]
+      properties:
+        name:
+          type: string
+          example: Jane Doe
+        bio:
+          type: string
+          example: I am a fantasy author based in New York...
+    AuthorApproveRequest:
+      type: object
+      description: Optional fields to update on approval
+      properties:
+        name:
+          type: string
+          example: Jane A. Doe
+        bio:
+          type: string
+          example: Updated bio at time of approval.
+    AuthorRejectRequest:
+      type: object
+      required: [reason]
+      properties:
+        reason:
+          type: string
+          example: Application does not meet our current needs.
+    AuthorRevokeRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          example: Violation of terms of service.
+    CreateReviewRequest:
+      type: object
+      required: [bookId, rating]
+      properties:
+        bookId:
+          type: string
+        rating:
+          type: number
+          minimum: 1
+          maximum: 5
+        review:
+          type: string
+    UpdateReviewRequest:
+      type: object
+      required: [rating]
+      properties:
+        rating:
+          type: number
+          minimum: 1
+          maximum: 5
+        review:
+          type: string
+    AddToCartRequest:
+      type: object
+      required: [bookId, priceAtAdd]
+      properties:
+        bookId:
+          type: string
+        qty:
+          type: number
+          default: 1
+        priceAtAdd:
+          type: number
+    UpdateCartRequest:
+      type: object
+      required: [bookId, qty]
+      properties:
+        bookId:
+          type: string
+        qty:
+          type: number
+          minimum: 1
+    PlaceOrderRequest:
+      type: object
+      properties:
+        shippingAddress:
+          $ref: '#/components/schemas/Address'
+        payment:
+          type: object
+          properties:
+            method:
+              type: string
+              example: cash
+            couponCode:
+              type: string
+              example: BOOK10
+    ChatMessageRequest:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+          example: "Recommend me a good sci-fi book"
+    ChatMessageResponse:
+      type: object
+      properties:
+        reply:
+          type: string
+          example: "I recommend 'Dune' by Frank Herbert."
+
+    # --- Error Schemas ---
+    Error400:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Email is already taken
+    Error401:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Invalid email or password
+    Error403:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Not authorized to update this review
+    Error404:
+      type: object
+      properties:
+        error:
+          type: string
+          example: User not found
+    Error500:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Server error
+
+  # 4. Define Global Components
+  responses:
+    ListAuthorsResponse:
+      type: object
+      properties:
+        meta:
+          type: object
+          properties:
+            total:
+              type: integer
+              example: 50
+            page:
+              type: integer
+              example: 1
+            limit:
+              type: integer
+              example: 20
+            pages:
+              type: integer
+              example: 3
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Author'
+    Error400:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error400'
+    Error401:
+      description: Unauthorized (invalid or missing token)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error401'
+    Error403:
+      description: Forbidden (user does not have permission)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error403'
+    Error404:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error404'
+    Error500:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error500'
+
+# 3. Define Paths
+paths:
+
+  # --- Auth ---
+  /api/auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+            example:
+              FirstName: "Ali"
+              LastName: "ITI"
+              email: "email@example.com"
+              password: "Mypass12345@iti"
+              confirmPassword: "Mypass12345@iti"
+      responses:
+        '201':
+          description: User registered successfully. Verification email sent.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User registered successfully
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Bad Request (e.g., validation error)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error400'
+        '409':
+          description: Email already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error400'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Log in a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              email: "email@example.com"
+              password: "Mypass12345@iti"
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Unauthorized. Reasons include- 'Invalid email or password', 'Please verify your email first', or 'Email has been deleted'.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error401'
+        '500':
+          $ref: '#/components/responses/Error500'
+  /api/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Log out a user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Logout successful
+  /api/auth/verify/{token}:
+    get:
+      tags: [Auth]
+      summary: Verify a user's email address
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Email verified successfully
+        '400':
+          description: Invalid or expired link
+  /api/auth/forgot-password:
+    post:
+      tags: [Auth]
+      summary: Request a password reset email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+      responses:
+        '200':
+          description: Reset email sent
+        '404':
+          description: User not found
+  /api/auth/reset-password/{token}:
+    post:
+      tags: [Auth]
+      summary: Reset password using token
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+      responses:
+        '200':
+          description: Password reset successfully
+        '400':
+          description: Invalid or expired token
+  /api/auth/change-password:
+    post:
+      tags: [Auth]
+      summary: Change password for logged-in user
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+      responses:
+        '200':
+          description: Password updated successfully
+        '400':
+          description: Incorrect old password
+  
+  # --- Profile ---
+  /api/profile/getprofile:
+    get:
+      tags: [Profile]
+      summary: Get authenticated user's profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '404':
+          $ref: '#/components/responses/Error404'
+  /api/profile/updateprofile:
+    put:
+      tags: [Profile]
+      summary: Update authenticated user's profile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Email is already taken
+        '401':
+          $ref: '#/components/responses/Error401'
+  /api/profile/deleteprofile:
+    delete:
+      tags: [Profile]
+      summary: Delete authenticated user's account
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteAccountRequest'
+      responses:
+        '200':
+          description: Account deleted successfully
+        '400':
+          description: Incorrect password
+        '401':
+          $ref: '#/components/responses/Error401'
+          
+  # --- Books ---
+  /api/books:
+    get:
+      tags: [Books]
+      summary: List and filter books
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 12 }
+        - name: sort
+          in: query
+          schema: { type: string, enum: [price, -price, createdAt, -createdAt, title, -title] }
+        - name: q
+          in: query
+          description: Full-text search query
+          schema: { type: string }
+        - name: author
+          in: query
+          description: Filter by author ID
+          schema: { type: string }
+        - name: category
+          in: query
+          description: Filter by category ID
+          schema: { type: string }
+        - name: minPrice
+          in: query
+          schema: { type: number }
+        - name: maxPrice
+          in: query
+          schema: { type: number }
+        - name: isActive
+          in: query
+          schema: { type: boolean, default: true }
+      responses:
+        '200':
+          description: A paginated list of books
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meta:
+                    type: object
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Book'
+    post:
+      tags: [Books]
+      summary: (Admin) Create a new book
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Book'
+      responses:
+        '201':
+          description: Book created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+  /api/books/{id}:
+    get:
+      tags: [Books]
+      summary: Get a single book by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Book details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '404':
+          $ref: '#/components/responses/Error404'
+    put:
+      tags: [Books]
+      summary: (Admin) Update a book by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Book'
+      responses:
+        '200':
+          description: Book updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '404':
+          $ref: '#/components/responses/Error404'
+    delete:
+      tags: [Books]
+      summary: (Admin) Delete or deactivate a book
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+        - name: hard
+          in: query
+          description: "If 'true', permanently deletes. Otherwise, sets isActive=false."
+          schema: { type: boolean, default: false }
+      responses:
+        '200':
+          description: Book deactivated or deleted
+          
+  # --- Authors ---
+  /api/authors:
+    get:
+      tags: [Authors]
+      summary: List authors (public, filterable)
+      description: Get a public, paginated list of authors. Can be filtered by admins.
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20 }
+        - name: sort
+          in: query
+          schema: { type: string, default: "name" }
+        - name: q
+          in: query
+          description: Search by author name
+          schema: { type: string }
+        - name: status
+          in: query
+          description: (Admin) Filter by status
+          schema: { type: string, enum: [pending, approved, rejected, revoked] }
+      responses:
+        '200':
+          description: A paginated list of authors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListAuthorsResponse'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /api/authors/apply:
+    post:
+      tags: [Authors]
+      summary: (User) Apply to become an author
+      description: Submits an application to become an author. User must be authenticated.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorApplyRequest'
+      responses:
+        '201':
+          description: Application submitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Author'
+        '400':
+          description: You have already applied
+        '401':
+          $ref: '#/components/responses/Error401'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /api/authors/me/profile:
+    get:
+      tags: [Authors]
+      summary: (User) Get my author application/profile
+      description: Gets the logged-in user's own author record, which could be pending, approved, etc.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Author record found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Author'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '404':
+          description: No author record found
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /api/authors/{id}:
+    get:
+      tags: [Authors]
+      summary: Get a single author profile (public)
+      description: Get the public profile of a single author by their ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Author details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Author'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+    delete:
+      tags: [Authors]
+      summary: (Admin) Hard delete an author record
+      description: Permanently deletes an author record. This is a destructive action.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Author deleted
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /api/authors/{id}/approve:
+    patch:
+      tags: [Authors]
+      summary: (Admin) Approve an author
+      description: Approves a 'pending' author application and updates their role to 'author'.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorApproveRequest'
+      responses:
+        '200':
+          description: Author approved
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+
+  /api/authors/{id}/reject:
+    patch:
+      tags: [Authors]
+      summary: (Admin) Reject an author
+      description: Rejects a 'pending' author application.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorRejectRequest'
+      responses:
+        '200':
+          description: Author rejected
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+
+  /api/authors/{id}/revoke:
+    patch:
+      tags: [Authors]
+      summary: (Admin) Revoke an author
+      description: Revokes an 'approved' author's privileges and demotes their role to 'user'.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorRevokeRequest'
+      responses:
+        '200':
+          description: Author revoked
+        '400':
+          description: Only approved authors can be revoked
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+
+  # --- Categories ---
+  /api/categories:
+    get:
+      tags: [Categories]
+      summary: List all categories
+      responses:
+        '200':
+          description: A list of categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+    post:
+      tags: [Categories]
+      summary: (Admin) Create a new category
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Category'
+      responses:
+        '201':
+          description: Category created
+  /api/categories/{id}:
+    get:
+      tags: [Categories]
+      summary: Get a single category by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Category details
+        '404':
+          $ref: '#/components/responses/Error404'
+    put:
+      tags: [Categories]
+      summary: (Admin) Update a category
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Category'
+      responses:
+        '200':
+          description: Category updated
+        '404':
+          $ref: '#/components/responses/Error404'
+    delete:
+      tags: [Categories]
+      summary: (Admin) Delete a category
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Category deleted
+        '404':
+          $ref: '#/components/responses/Error404'
+          
+  # --- Reviews ---
+  /api/reviews/book/{bookId}:
+    get:
+      tags: [Reviews]
+      summary: Get all reviews for a specific book
+      description: Gets a paginated list of all reviews for a specific book. This is a public endpoint.
+      parameters:
+        - name: bookId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: 68ece8d94f8441ee8f486882
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: A paginated list of reviews
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    type: object
+                    properties:
+                      currentPage:
+                        type: integer
+                        example: 1
+                      totalPages:
+                        type: integer
+                        example: 3
+                      totalItems:
+                        type: integer
+                        example: 25
+                      limit:
+                        type: integer
+                        example: 10
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Review'
+        '500':
+          $ref: '#/components/responses/Error500'
+  /api/reviews/user/{userId}:
+    get:
+      tags: [Reviews]
+      summary: Get all reviews from a specific user
+      description: Gets a paginated list of reviews written by a specific user. A user can get their own reviews; an admin can get anyone's reviews.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: 68eae7202ed3f81131f64f90
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: A paginated list of reviews
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    type: object
+                    properties:
+                      currentPage:
+                        type: integer
+                        example: 1
+                      totalPages:
+                        type: integer
+                        example: 5
+                      totalItems:
+                        type: integer
+                        example: 48
+                      limit:
+                        type: integer
+                        example: 10
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Review'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+  /api/reviews:
+    post:
+      tags: [Reviews]
+      summary: (User) Create a new review
+      description: User must have purchased the book to review it.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReviewRequest'
+      responses:
+        '201':
+          description: Review created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+        '400':
+          description: You have already reviewed this book
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          description: You can only review books you have purchased
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+  /api/reviews/{reviewId}:
+    put:
+      tags: [Reviews]
+      summary: (User) Update an existing review
+      description: Allows a user to update their own review.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: reviewId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: 68fa2432b05cf7ddb8a12345
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateReviewRequest'
+      responses:
+        '200':
+          description: Review updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          description: Not authorized to update this review
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error403'
+        '404':
+          description: Review not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+          
+    delete:
+      tags: [Reviews]
+      summary: (Admin/User) Delete a review
+      description: Allows a user or an admin to delete a review.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: reviewId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: 68fa2432b05cf7ddb8a12345
+      responses:
+        '200':
+          description: Review deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Review deleted successfully
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          description: Not authorized to delete this review
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error403'
+        '404':
+          description: Review not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+          
+  # --- Cart (from CART_API.md) ---
+  /api/cart:
+    get:
+      tags: [Cart]
+      summary: Get the current user's cart
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Cart data or empty cart message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Cart'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '500':
+          $ref: '#/components/responses/Error500'
+    post:
+      tags: [Cart]
+      summary: Add a book to the cart
+      description: Adds a book to the cart or updates quantity if it already exists.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddToCartRequest'
+      responses:
+        '200':
+          description: Book added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/Cart'
+        '400':
+          description: Price is required
+        '404':
+          description: Book not found
+    put:
+      tags: [Cart]
+      summary: Update cart item quantity
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCartRequest'
+      responses:
+        '200':
+          description: Cart updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/Cart'
+        '400':
+          description: Valid Book ID and quantity are required
+        '404':
+          description: Cart not found or book not in cart
+    delete:
+      tags: [Cart]
+      summary: Clear all items from the cart
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Cart cleared successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/Cart'
+        '404':
+          description: Cart not found
+  /api/cart/{bookId}:
+    delete:
+      tags: [Cart]
+      summary: Remove a specific book from the cart
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: bookId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Book removed from cart successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/Cart'
+        '404':
+          description: Cart not found
+
+  # --- Orders (from ORDER_PAYMENT_API.md) ---
+  /api/orders:
+    get:
+      tags: [Orders]
+      summary: (User) Get my orders
+      description: Returns the authenticated user’s orders, newest first.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of user's orders
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: string
+                  code:
+                    type: number
+                  orders:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Order'
+        '401':
+          $ref: '#/components/responses/Error401'
+    post:
+      tags: [Orders]
+      summary: (User) Place an order
+      description: Creates an order from the user's cart and clears the cart.
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Shipping address is optional; will use default if not provided.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlaceOrderRequest'
+      responses:
+        '201':
+          description: Order placed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: string
+                  code:
+                    type: number
+                  order:
+                    $ref: '#/components/schemas/Order'
+        '400':
+          description: Your cart is empty or No shipping address found
+        '401':
+          $ref: '#/components/responses/Error401'
+  /api/orders/{orderId}/cancel:
+    post:
+      tags: [Orders]
+      summary: (User) Cancel my order
+      description: Cancels a *pending* order owned by the user.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  example: I changed my mind
+      responses:
+        '200':
+          description: Order cancelled successfully
+        '400':
+          description: Order is not pending or already shipped
+        '403':
+          description: You cannot cancel someone else's order
+        '404':
+          description: Order not found
+  /api/orders/admin:
+    get:
+      tags: [Orders]
+      summary: (Admin) Get all orders
+      description: Returns all orders in the system, newest first.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of all orders
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  allOrders:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Order'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+  /api/orders/admin/{orderId}/cancel:
+    post:
+      tags: [Orders]
+      summary: (Admin) Cancel or refund an order
+      description: Cancels a 'pending' order or refunds a 'paid' order.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  example: Customer request
+                restock:
+                  type: boolean
+                  default: true
+      responses:
+        '200':
+          description: Order cancelled or refunded
+        '400':
+          description: Cannot cancel a shipped/delivered order
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+  /api/orders/admin/{orderId}/paid:
+    post:
+      tags: [Orders]
+      summary: (Admin) Mark an order as paid
+      description: Transitions order status from `pending` to `paid`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Order marked as paid
+        '400':
+          description: Invalid status transition
+  /api/orders/admin/{orderId}/shipped:
+    post:
+      tags: [Orders]
+      summary: (Admin) Mark an order as shipped
+      description: Transitions order status from `paid` to `shipped`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Order marked as shipped
+        '400':
+          description: Invalid status transition
+  /api/orders/admin/{orderId}/delivered:
+    post:
+      tags: [Orders]
+      summary: (Admin) Mark an order as delivered
+      description: Transitions order status from `shipped` to `delivered`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Order marked as delivered
+        '400':
+          description: Invalid status transition
+
+  # --- Payments (from ORDER_PAYMENT_API.md) ---
+  /api/payments/create-checkout/{orderId}:
+    post:
+      tags: [Payments]
+      summary: (User) Create Stripe Checkout Session
+      description: Creates a Stripe Checkout Session for a 'pending' order.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Checkout session created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  checkoutUrl:
+                    type: string
+                    format: uri
+                    example: https://checkout.stripe.com/c/session_...
+                  sessionId:
+                    type: string
+                    example: cs_test_abc123
+        '400':
+          description: Order is not pending or currency mismatch
+        '403':
+          description: Forbidden (not order owner)
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          description: Failed to create checkout session
+  /api/payments/test-confirm/{orderId}:
+    post:
+      tags: [Payments]
+      summary: (User - TEST) Confirm a payment for testing
+      description: Bypasses Stripe checkout for testing; directly confirms payment.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                payment_method:
+                  type: string
+                  example: pm_card_visa
+      responses:
+        '200':
+          description: Payment succeeded & order marked as paid
+        '400':
+          description: Payment not succeeded
+          
+  # --- Upload ---
+  /api/upload/image/{bookId}:
+    post:
+      tags: [Upload]
+      summary: (Admin/Author) Upload a book cover image
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: bookId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The image file to upload.
+      responses:
+        '200':
+          description: Image uploaded successfully
+        '400':
+          description: File upload error
+        '404':
+          description: Book not found
+  /api/upload/book/{bookId}:
+    post:
+      tags: [Upload]
+      summary: (Admin/Author) Upload a book PDF file
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: bookId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The PDF file to upload.
+      responses:
+        '200':
+          description: Book uploaded successfully
+        '400':
+          description: File upload error
+        '404':
+          description: Book not found
+          
+  # --- Download ---
+  /api/download/book/{bookId}:
+    get:
+      tags: [Download]
+      summary: (User) Download a purchased book
+      description: User must have a 'paid' order containing this bookId.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: bookId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: The book PDF file.
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '403':
+          description: You can only download the books you have purchased
+        '404':
+          description: Book or book file not found
+
+  # --- Chat ---
+  /api/chat:
+    post:
+      tags: [Chat]
+      summary: Talk to the AI assistant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatMessageRequest'
+      responses:
+        '200':
+          description: AI assistant's reply
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatMessageResponse'
+        '400':
+          description: message is required
+        '502':
+          description: Groq API error
+  /api/chat/_whoami:
+    get:
+      tags: [Chat]
+      summary: Health check for the chat service
+      responses:
+        '200':
+          description: Returns the active chat route and model
+          
+  # --- Webhooks ---
+  /webhooks/stripe:
+    post:
+      tags: [Webhooks]
+      summary: Stripe payment webhook
+      description: Listens for events from Stripe (e.g., checkout.session.completed).
+      requestBody:
+        description: Raw JSON payload sent by Stripe.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Webhook received
+        '400':
+          description: Webhook error or signature verification failed
