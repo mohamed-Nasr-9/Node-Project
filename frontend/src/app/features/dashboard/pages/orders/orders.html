@@ -1,0 +1,223 @@
+<h2 class="mb-3">Orders</h2>
+
+<div class="d-flex align-items-center mb-2">
+  <input class="form-control me-2" style="max-width:320px" placeholder="Search by ID, name, status..."
+    [(ngModel)]="query">
+  <button class="btn btn-outline-secondary" (click)="load()">Reload</button>
+</div>
+
+<div *ngIf="flashText" class="alert alert-{{flashType}} alert-dismissible fade show py-2" role="alert">
+  {{ flashText }}
+  <button type="button" class="btn-close btn-sm" aria-label="Close"
+          (click)="flashText = null"></button>
+</div>
+
+<div *ngIf="error" class="alert alert-danger py-2">{{error}}</div>
+
+<div class="card card-glass shadow-soft">
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th style="width:160px">Order ID</th>
+          <th>Customer</th>
+          <th class="text-end" style="width:140px">Total</th>
+          <th style="width:130px">Status</th>
+          <th class="text-center" style="width:120px">Details</th>
+          <th class="text-center" style="width:200px">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody *ngIf="!loading; else loadingTpl">
+        <tr *ngFor="let o of filtered">
+          <td><strong>{{ o._id }}</strong></td>
+          <td class="text-muted">
+            {{ o.shippingAddress.fullName }}<br>
+            <small>{{ o.placedAt | date:'short' }}</small>
+          </td>
+          <td class="text-end fw-semibold">{{ o.amounts.grandTotal | currency:o.currency:'symbol' }}</td>
+          <td>
+            <span class="badge" [ngClass]="statusClass(o.status)">
+              {{ statusLabel(o.status) }}
+            </span>
+          </td>
+
+          <td class="text-center">
+            <button class="btn btn-sm text-white" style="background-color:#ff5a7a;border-color:#ff5a7a"
+              data-bs-toggle="modal" data-bs-target="#orderDetailsModal" (click)="openDetails(o)">
+              <i class="bi bi-card-list me-1"></i> Details
+            </button>
+          </td>
+          <td class="text-center">
+            <div class="btn-group">
+              <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown"
+                data-bs-container="body" data-bs-boundary="viewport" data-bs-offset="0,0" aria-expanded="false">
+                Choose
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                  <button type="button" class="dropdown-item text-danger" (click)="cancel(o)">
+                    Cancelled
+                  </button>
+                </li>
+                <li>
+                  <button type="button" class="dropdown-item text-success" (click)="delivered(o)">
+                    Delivered
+                  </button>
+                </li>
+                <li>
+                  <button type="button" class="dropdown-item text-primary" (click)="paid(o)">
+                    Paid
+                  </button>
+                </li>
+                <li>
+                  <button type="button" class="dropdown-item text-info" (click)="shipped(o)">
+                    Shipping
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </td>
+
+
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<ng-template #loadingTpl>
+  <div class="p-4 text-center text-muted">Loading…</div>
+</ng-template>
+
+<!-- Modal Backdrop -->
+<!-- Popup -->
+
+<div class="modal" id="orderDetailsModal" data-bs-backdrop="false" data-bs-keyboard="true" tabindex="-1"
+  aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-fullscreen-md-down modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content card-glass" *ngIf="selected as o">
+
+      <div class="modal-header">
+        <h5 class="modal-title mb-0 d-flex align-items-center gap-2">
+          <span>Order {{ o._id }}</span>
+          <span class="badge" [ngClass]="statusClass(o.status)">{{ statusLabel(o.status) }}</span>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+        <div class="modal-body overflow-auto">
+
+        <div class="small text-muted mb-3 d-flex flex-wrap gap-2">
+          <span class="text-dark fw-semibold">{{ o.shippingAddress.fullName }}</span>
+          <span>•</span>
+          <span>{{ o.placedAt | date:'short' }}</span>
+          <span>•</span>
+          <span class="badge" [ngClass]="statusClass(o.status)">{{ statusLabel(o.status) }}</span>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-12 col-lg-4">
+            <div class="border rounded p-3 h-100">
+              <div class="fw-semibold mb-2">Shipping Address</div>
+              <div class="small text-muted">
+                <div class="mb-1"><span class="fw-semibold text-dark">{{ o.shippingAddress.fullName }}</span></div>
+                <div>Phone: {{ o.shippingAddress.phone }}</div>
+                <div>City: {{ o.shippingAddress.city }}</div>
+                <div>Country: {{ o.shippingAddress.country }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-4">
+            <div class="border rounded p-3 h-100">
+              <div class="fw-semibold mb-2">Payment</div>
+              <div class="small text-muted">
+                <div>Method: <span class="text-dark fw-semibold">{{ o.payment?.method || '—' }}</span></div>
+                <div>
+                  Status:
+                  <span class="badge" [ngClass]="{
+                          'bg-success-subtle text-success': (o.payment?.status||'').toLowerCase()==='paid',
+                          'bg-warning-subtle text-warning': (o.payment?.status||'').toLowerCase()==='pending',
+                          'bg-danger-subtle text-danger'  : ['failed','refunded'].includes((o.payment?.status||'').toLowerCase())
+                        }">
+                    {{ (o.payment?.status || '—') | titlecase }}
+                  </span>
+                </div>
+                <div class="text-break">TxId: <span class="text-dark">{{ o.payment?.txId || '—' }}</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-4">
+            <div class="border rounded p-3 h-100">
+              <div class="fw-semibold mb-2">Amounts</div>
+
+              <div class="small">
+                <div class="d-flex justify-content-between py-1">
+                  <span class="text-muted">Items total</span>
+                  <span class="fw-semibold">{{ o.amounts.itemsTotal | currency:o.currency }}</span>
+                </div>
+
+                <div class="d-flex justify-content-between py-1">
+                  <span class="text-muted">Shipping</span>
+                  <span>
+                    <ng-container *ngIf="o.amounts.shipping === 0; else shipValue">
+                      <span class="badge bg-success-subtle text-success">Free</span>
+                    </ng-container>
+                    <ng-template #shipValue>
+                      <span class="fw-semibold">{{ o.amounts.shipping | currency:o.currency }}</span>
+                    </ng-template>
+                  </span>
+                </div>
+
+                <div class="d-flex justify-content-between py-1">
+                  <span class="text-muted">Discount</span>
+                  <span>
+                    <ng-container *ngIf="o.amounts.discount > 0; else noDisc">
+                      <span class="fw-semibold text-danger">-{{ o.amounts.discount | currency:o.currency }}</span>
+                    </ng-container>
+                    <ng-template #noDisc><span class="text-muted">—</span></ng-template>
+                  </span>
+                </div>
+
+                <hr class="my-2">
+
+                <div class="d-flex justify-content-between align-items-center">
+                  <span class="fw-semibold">Grand total</span>
+                  <span class="fw-bold">{{ o.amounts.grandTotal | currency:o.currency }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-sm align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Item (bookId)</th>
+                <th class="text-end">Qty</th>
+                <th class="text-end">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let it of o.items">
+                <td class="text-break">{{ it.bookId }}</td>
+                <td class="text-end">{{ it.qty }}</td>
+                <td class="text-end">{{ it.priceAtAdd | currency:o.currency }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <div class="me-auto fw-semibold">Total: {{ o.amounts.grandTotal | currency:o.currency }}</div>
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+
+    </div>
+  </div>
+</div>

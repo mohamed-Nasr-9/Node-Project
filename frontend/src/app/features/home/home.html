@@ -1,0 +1,349 @@
+<app-header></app-header>
+
+<!-- Features Section - Top -->
+<section class="features-section py-4 bg-white border-bottom">
+  <div class="container">
+    <div class="row g-3">
+      <div class="col-6 col-md-3 text-center">
+        <div class="feature-icon mb-2">
+          <i class="bi bi-truck fs-2 text-danger"></i>
+        </div>
+        <h6 class="fw-bold mb-1 small">Free delivery</h6>
+        <p class="text-muted small mb-0">Consectetur adipi elit lorem ipsum dolor sit amet.</p>
+      </div>
+      <div class="col-6 col-md-3 text-center">
+        <div class="feature-icon mb-2">
+          <i class="bi bi-shield-check fs-2 text-danger"></i>
+        </div>
+        <h6 class="fw-bold mb-1 small">Quality guarantee</h6>
+        <p class="text-muted small mb-0">Dolor sit amet orem ipsu mcons ectetur adipi elit.</p>
+      </div>
+      <div class="col-6 col-md-3 text-center">
+        <div class="feature-icon mb-2">
+          <i class="bi bi-tag fs-2 text-danger"></i>
+        </div>
+        <h6 class="fw-bold mb-1 small">Daily offers</h6>
+        <p class="text-muted small mb-0">Amet consectetur adipi elit loreme ipsum dolor sit.</p>
+      </div>
+      <div class="col-6 col-md-3 text-center">
+        <div class="feature-icon mb-2">
+          <i class="bi bi-lock fs-2 text-danger"></i>
+        </div>
+        <h6 class="fw-bold mb-1 small">100% secure payment</h6>
+        <p class="text-muted small mb-0">Rem Lopsum dolor sit amet, consectetur adipi elit.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Best Selling Items -->
+<section class="best-selling-section py-5 bg-light">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="fw-bold mb-0">Best selling items</h2>
+      <a href="#" class="text-decoration-none fw-semibold text-danger">View All <i class="bi bi-arrow-right"></i></a>
+    </div>
+    <div class="row g-4" *ngIf="books.length > 0">
+      <div class="col-6 col-md-4 col-lg-2" *ngFor="let book of books.slice(0, 6)">
+        <div class="book-card position-relative bg-white rounded shadow-sm p-2" (click)="navigateToBook(book._id)">
+          <div class="book-badge position-absolute top-0 end-0 m-2" *ngIf="book.discount">
+            <span class="badge bg-danger">10% off</span>
+          </div>
+          <div class="book-image-wrapper mb-2">
+            <img 
+              [src]="book.image?.url || palceholderCover"
+              [alt]="book.title"
+              class="w-100 rounded"
+              style="height: 250px; object-fit: cover;">
+          </div>
+          <h6 class="fw-semibold mb-1 small text-dark">{{ book.title }}</h6>
+          <p class="text-muted mb-1 small">{{ book.author?.name || (book.authors && book.authors[0]?.name) || book.author || 'Unknown Author' }}</p>
+          <p class="fw-bold mb-0 text-danger">{{ book.price }} EGP</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Discount Component -->
+<app-discount></app-discount>
+
+<!-- Categories section -->
+<section class="categories-section py-5">
+  <div class="container">
+    <h2 class="text-center mb-5 fw-bold category-title">Browse Categories</h2>
+    <div class="row justify-content-center g-4">
+      <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-4" *ngFor="let category of categories; let i = index">
+        <div 
+          class="category-card-wrapper"
+          [attr.data-index]="i"
+          (click)="selectCategory(category)">
+          <mat-card 
+            class="h-100 border-0 text-center py-4 shadow-lg category-card" 
+            style="cursor: pointer;"
+            [class.selected]="selectedCategory === (category._id || category.id)">
+            <div class="category-icon-wrapper mb-3">
+              <mat-icon class="category-icon" [ngStyle]="{'color': category.color || '#dc3545', 'font-size.px': 40}">{{ category.icon }}</mat-icon>
+            </div>
+            <div class="fw-semibold category-name">{{ category.name }}</div>
+          </mat-card>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Featured, Latest, Best Reviewed, On Sale Sections -->
+<section class="book-sections py-5 bg-light">
+  <div class="container">
+    <div class="row g-4">
+      <!-- Featured -->
+      <div class="col-12 col-lg-3">
+        <h5 class="fw-bold mb-4 text-dark">Featured</h5>
+        <div class="book-list" *ngIf="books.length > 0">
+          <div class="book-item d-flex gap-3 mb-4 bg-white rounded p-3 shadow-sm" *ngFor="let book of books.slice(0, 3)" (click)="navigateToBook(book._id)" style="cursor: pointer;">
+            <img 
+              [src]="book.image?.url || palceholderCover" 
+              [alt]="book.title"
+              class="rounded"
+              style="width: 80px; height: 120px; object-fit: cover;">
+            <div class="flex-grow-1">
+              <h6 class="fw-semibold mb-1 small text-dark">{{ book.title }}</h6>
+              <p class="text-muted mb-1 small">{{ book.author?.name || (book.authors && book.authors[0]?.name) || book.author || 'Unknown Author' }}</p>
+              <p class="fw-bold mb-0 text-danger">{{ book.price }} EGP</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Latest items -->
+      <div class="col-12 col-lg-3">
+        <h5 class="fw-bold mb-4 text-dark">Latest items</h5>
+        <div class="book-list" *ngIf="books.length > 0">
+          <div class="book-item d-flex gap-3 mb-4 bg-white rounded p-3 shadow-sm" *ngFor="let book of books.slice(3, 6)" (click)="navigateToBook(book._id)" style="cursor: pointer;">
+            <img 
+              [src]="book.image?.url || palceholderCover" 
+              [alt]="book.title"
+              class="rounded"
+              style="width: 80px; height: 120px; object-fit: cover;">
+            <div class="flex-grow-1">
+              <h6 class="fw-semibold mb-1 small text-dark">{{ book.title }}</h6>
+              <p class="text-muted mb-1 small">{{ book.author?.name || (book.authors && book.authors[0]?.name) || book.author || 'Unknown Author' }}</p>
+              <p class="fw-bold mb-0 text-danger">{{ book.price }} EGP</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Best reviewed -->
+      <div class="col-12 col-lg-3">
+        <h5 class="fw-bold mb-4 text-dark">Best reviewed</h5>
+        <div class="book-list" *ngIf="books.length > 0">
+          <div class="book-item d-flex gap-3 mb-4 bg-white rounded p-3 shadow-sm" *ngFor="let book of books.slice(6, 9)" (click)="navigateToBook(book._id)" style="cursor: pointer;">
+            <img 
+              [src]="book.image?.url || palceholderCover"
+              [alt]="book.title"
+              class="rounded"
+              style="width: 80px; height: 120px; object-fit: cover;">
+            <div class="flex-grow-1">
+              <h6 class="fw-semibold mb-1 small text-dark">{{ book.title }}</h6>
+              <p class="text-muted mb-1 small">{{ book.author?.name || (book.authors && book.authors[0]?.name) || book.author || 'Unknown Author' }}</p>
+              <p class="fw-bold mb-0 text-danger">{{ book.price }} EGP</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- On sale -->
+      <div class="col-12 col-lg-3">
+        <h5 class="fw-bold mb-4 text-dark">On sale</h5>
+        <div class="book-list" *ngIf="books.length > 0">
+          <div class="book-item d-flex gap-3 mb-4 bg-white rounded p-3 shadow-sm" *ngFor="let book of books.slice(9, 12)" (click)="navigateToBook(book._id)" style="cursor: pointer;">
+            <img 
+              [src]="book.image?.url || palceholderCover" 
+              [alt]="book.title"
+              class="rounded"
+              style="width: 80px; height: 120px; object-fit: cover;">
+            <div class="flex-grow-1">
+              <h6 class="fw-semibold mb-1 small text-dark">{{ book.title }}</h6>
+              <p class="text-muted mb-1 small">{{ book.author?.name || (book.authors && book.authors[0]?.name) || book.author || 'Unknown Author' }}</p>
+              <p class="fw-bold mb-0 text-danger">
+                <span class="text-decoration-line-through text-muted me-2" *ngIf="book.originalPrice">{{ book.originalPrice }} EGP</span>
+                {{ book.price }} EGP
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Books section with filtering and pagination -->
+<section id="all-books" class="books-section py-5 bg-light">
+  <div class="container">
+    <h2 class="text-center mb-4 fw-bold">All Books</h2>
+    
+    <!-- Search and Filters -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card shadow-sm border-0 bg-white">
+          <div class="card-body p-4">
+            <!-- Search Bar -->
+            <div class="row mb-3">
+              <div class="col-12 col-md-6 mb-3 mb-md-0">
+                <div class="input-group">
+                  <input 
+                    type="text" 
+                    class="form-control" 
+                    placeholder="Search books by title, author..."
+                    [(ngModel)]="searchQuery"
+                    (keyup.enter)="onSearch()">
+                  <button class="btn btn-danger text-white" type="button" (click)="onSearch()">
+                    <i class="bi bi-search"></i> Search
+                  </button>
+                </div>
+              </div>
+              <div class="col-12 col-md-3 mb-3 mb-md-0">
+                <select class="form-select" [(ngModel)]="sortBy" (change)="onSortChange()">
+                  <option value="createdAt">Newest First</option>
+                  <option value="-createdAt">Oldest First</option>
+                  <option value="title">Title A-Z</option>
+                  <option value="-title">Title Z-A</option>
+                  <option value="price">Price: Low to High</option>
+                  <option value="-price">Price: High to Low</option>
+                </select>
+              </div>
+              <div class="col-12 col-md-3">
+                <button class="btn btn-outline-secondary w-100" (click)="clearFilters()">
+                  <i class="bi bi-x-circle"></i> Clear Filters
+                </button>
+              </div>
+            </div>
+
+            <!-- Filter Controls -->
+            <div class="row">
+              <div class="col-12 col-md-3 mb-3 mb-md-0">
+                <label class="form-label small fw-semibold">Category</label>
+                <select class="form-select form-select-sm" [(ngModel)]="selectedCategory" (change)="onCategoryChange()">
+                  <option value="">All Categories</option>
+                  <option *ngFor="let category of categories" [value]="category._id || category.id">
+                    {{ category.name }}
+                  </option>
+                </select>
+              </div>
+              <div class="col-12 col-md-3 mb-3 mb-md-0">
+                <label class="form-label small fw-semibold">Min Price</label>
+                <input 
+                  type="number" 
+                  class="form-control form-control-sm" 
+                  placeholder="Min"
+                  [(ngModel)]="minPrice"
+                  (ngModelChange)="onPriceFilterChange()"
+                  (blur)="onPriceFilterChange()"
+                  min="0"
+                  step="0.01">
+              </div>
+              <div class="col-12 col-md-3 mb-3 mb-md-0">
+                <label class="form-label small fw-semibold">Max Price</label>
+                <input 
+                  type="number" 
+                  class="form-control form-control-sm" 
+                  placeholder="Max"
+                  [(ngModel)]="maxPrice"
+                  (ngModelChange)="onPriceFilterChange()"
+                  (blur)="onPriceFilterChange()"
+                  min="0"
+                  step="0.01">
+              </div>
+              <div class="col-12 col-md-3">
+                <label class="form-label small fw-semibold text-muted">Results</label>
+                <div class="form-control form-control-sm bg-light border-0">
+                  {{ totalBooks }} books found
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Books Grid -->
+    <div class="row" *ngIf="books.length > 0">
+      <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4" *ngFor="let book of books">
+        <div class="book-card position-relative h-100 bg-white rounded shadow-sm p-3" (click)="navigateToBook(book._id)" style="cursor: pointer;">
+          <div class="book-badge position-absolute top-0 end-0 m-2" *ngIf="book.discount">
+            <span class="badge bg-danger">10% off</span>
+          </div>
+          <div class="book-image-wrapper mb-3">
+            <img 
+              [src]="book.image?.url || palceholderCover"
+              [alt]="book.title"
+              class="w-100 rounded"
+              style="height: 300px; object-fit: cover;">
+          </div>
+          <div class="book-info">
+            <h6 class="fw-semibold mb-1 text-dark">{{ book.title }}</h6>
+            <p class="text-muted mb-2 small">{{ book.author?.name || (book.authors && book.authors[0]?.name) || book.author || 'Unknown Author' }}</p>
+            <div class="d-flex justify-content-between align-items-center">
+              <p class="fw-bold mb-0 text-danger">{{ book.price }} EGP</p>
+              <button mat-icon-button class="ms-2 text-danger" (click)="addToCart(book, $event)">
+                <i class="bi bi-cart-plus fs-5"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Results Message -->
+    <div class="text-center py-5" *ngIf="books.length === 0">
+      <p class="text-muted">No books found. Try adjusting your filters.</p>
+    </div>
+
+    <!-- Pagination -->
+    <div class="row mt-4" *ngIf="totalPages > 1">
+      <div class="col-12">
+        <nav aria-label="Page navigation">
+          <ul class="pagination justify-content-center">
+            <li class="page-item" [class.disabled]="currentPage === 1">
+              <a class="page-link" href="#" (click)="$event.preventDefault(); onPageChange(currentPage - 1)" *ngIf="currentPage > 1">Previous</a>
+              <span class="page-link" *ngIf="currentPage === 1">Previous</span>
+            </li>
+            
+            <li class="page-item" *ngFor="let page of getPageNumbers()" [class.active]="page === currentPage">
+              <a class="page-link" href="#" (click)="$event.preventDefault(); typeof page === 'number' && onPageChange(page)" *ngIf="page !== '...'">{{ page }}</a>
+              <span class="page-link" *ngIf="page === '...'">{{ page }}</span>
+            </li>
+            
+            <li class="page-item" [class.disabled]="currentPage === totalPages">
+              <a class="page-link" href="#" (click)="$event.preventDefault(); onPageChange(currentPage + 1)" *ngIf="currentPage < totalPages">Next</a>
+              <span class="page-link" *ngIf="currentPage === totalPages">Next</span>
+            </li>
+          </ul>
+        </nav>
+        <div class="text-center mt-2 text-muted small">
+          Page {{ currentPage }} of {{ totalPages }} ({{ totalBooks }} total books)
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Customer Reviews Section -->
+<section class="reviews-section py-5 bg-white">
+  <div class="container">
+    <h2 class="text-center mb-5 fw-bold">Customers reviews</h2>
+    <div class="row g-4">
+      <div class="col-12 col-md-6 col-lg-3" *ngFor="let review of customerReviews">
+        <div class="card h-100 border-0 shadow-sm bg-white">
+          <div class="card-body p-4">
+            <p class="card-text text-muted mb-3">"{{ review.text }}"</p>
+            <h6 class="fw-bold mb-0 text-dark">{{ review.author }}</h6>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<app-footer [categories]="categories"></app-footer>
+
+<app-chatbot></app-chatbot>

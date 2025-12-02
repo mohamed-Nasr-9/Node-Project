@@ -1,0 +1,252 @@
+<app-header></app-header>
+
+<div class="cart-container d-flex align-items-center justify-content-center">
+  <div class="w-100" style="max-width: 720px;">
+    
+    <!-- Flash message -->
+    <div *ngIf="flashText" class="cart-flash-message mb-3" [ngClass]="flashType">
+      {{ flashText }}
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="loading" class="loading-container text-center py-5">
+      <mat-spinner></mat-spinner>
+    </div>
+
+    <!-- Empty cart -->
+    <div *ngIf="!loading && isEmpty" class="empty-cart text-center py-5">
+      <h2 class="mb-2">Your cart is empty</h2>
+      <p class="text-muted mb-4">Please add some books before payment.</p>
+      <button mat-raised-button color="primary" routerLink="/cart">
+        Back to cart
+      </button>
+    </div>
+
+    <!-- Payment card -->
+    <div *ngIf="!loading && !isEmpty && cart">
+      <mat-card class="cart-summary payment-card shadow-sm">
+        <h2 class="mb-3">Order Summary</h2>
+
+        <div class="summary-row d-flex justify-content-between mb-1">
+          <span>Subtotal ({{ cartItems.length }} items)</span>
+          <span class="fw-semibold">{{ subtotal }} EGP</span>
+        </div>
+
+        <div class="summary-row d-flex justify-content-between mb-1">
+          <span>Shipping</span>
+          <span class="free text-success fw-semibold">Applied on checkout</span>
+        </div>
+
+        <mat-divider class="my-2"></mat-divider>
+
+        <div class="summary-row d-flex justify-content-between mb-3">
+          <span class="fw-semibold">Total</span>
+          <span class="fw-bold">{{ subtotal }} EGP</span>
+        </div>
+
+        <mat-divider class="my-2"></mat-divider>
+
+        <h3 class="section-title mt-3 mb-2 text-uppercase small text-muted">Shipping details (optional)</h3>
+
+        <div class="row g-2">
+          <div class="col-12 col-sm-6">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Full name</mat-label>
+              <input matInput [(ngModel)]="shippingName" name="shippingName">
+            </mat-form-field>
+          </div>
+
+          <div class="col-12 col-sm-6">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Phone</mat-label>
+              <input matInput [(ngModel)]="shippingPhone" name="shippingPhone">
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="row g-2">
+          <div class="col-12 col-sm-6">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Address line 1</mat-label>
+              <input matInput [(ngModel)]="shippingLine1" name="shippingLine1">
+            </mat-form-field>
+          </div>
+
+          <div class="col-12 col-sm-6">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Address line 2</mat-label>
+              <input matInput [(ngModel)]="shippingLine2" name="shippingLine2">
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="row g-2">
+          <div class="col-12 col-sm-6">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>City</mat-label>
+              <input matInput [(ngModel)]="shippingCity" name="shippingCity">
+            </mat-form-field>
+          </div>
+
+          <div class="col-12 col-sm-6">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Postal code</mat-label>
+              <input matInput [(ngModel)]="shippingPostalCode" name="shippingPostalCode">
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="row g-2">
+          <div class="col-12 col-sm-6">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Country</mat-label>
+              <input matInput [(ngModel)]="shippingCountry" name="shippingCountry">
+            </mat-form-field>
+          </div>
+        </div>
+
+        <h3 class="section-title mt-3 mb-2 text-uppercase small text-muted">Coupon code (optional)</h3>
+
+        <div class="row g-2 mb-3">
+          <div class="col-12 col-sm-8">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Coupon code</mat-label>
+              <input matInput [(ngModel)]="couponCode" name="couponCode">
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="d-flex flex-column flex-sm-row gap-2 mt-3">
+          <button
+            mat-raised-button
+            color="primary"
+            class="flex-grow-1"
+            (click)="checkoutOfOrder()"
+            [disabled]="checkoutLoading || isEmpty">
+            <ng-container *ngIf="!checkoutLoading">
+              Place order
+            </ng-container>
+            <ng-container *ngIf="checkoutLoading">
+              <mat-spinner diameter="20"></mat-spinner>
+              &nbsp;Processing...
+            </ng-container>
+          </button>
+
+          <button
+            mat-stroked-button
+            class="flex-grow-1"
+            routerLink="/cart"
+            [disabled]="checkoutLoading">
+            Back to cart
+          </button>
+        </div>
+      </mat-card>
+    </div>
+  </div>
+</div>
+
+<!-- Payment Confirm Modal -->
+<div class="modal fade" id="paymentConfirmModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">
+          Confirm your order
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body" *ngIf="lastOrder as o">
+        <p class="text-muted small mb-3">
+          Please review your order before proceeding to payment.
+        </p>
+
+        <div class="row g-3 mb-3">
+          <div class="col-12 col-md-6">
+            <div class="border rounded p-3 h-100">
+              <div class="fw-semibold mb-2">Order info</div>
+              <div class="small text-muted">
+                <div><span class="text-dark fw-semibold">Order ID:</span> {{ o._id }}</div>
+                <div><span class="text-dark fw-semibold">Status:</span> {{ o.status | titlecase }}</div>
+                <div><span class="text-dark fw-semibold">Placed at:</span> {{ o.placedAt | date:'short' }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <div class="border rounded p-3 h-100">
+              <div class="fw-semibold mb-2">Amounts</div>
+              <div class="small">
+                <div class="d-flex justify-content-between">
+                  <span class="text-muted">Items total</span>
+                  <span class="fw-semibold">{{ o.amounts.itemsTotal | currency:o.currency }}</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                  <span class="text-muted">Shipping</span>
+                  <span class="fw-semibold">{{ o.amounts.shipping | currency:o.currency }}</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                  <span class="text-muted">Discount</span>
+                  <span class="fw-semibold text-danger">
+                    -{{ o.amounts.discount | currency:o.currency }}
+                  </span>
+                </div>
+                <hr class="my-2">
+                <div class="d-flex justify-content-between">
+                  <span class="fw-semibold">Grand total</span>
+                  <span class="fw-bold">{{ o.amounts.grandTotal | currency:o.currency }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="border rounded p-3 mb-2" *ngIf="o.shippingAddress">
+          <div class="fw-semibold mb-2">Shipping address</div>
+          <div class="small text-muted">
+            <div class="fw-semibold text-dark">{{ o.shippingAddress.fullName || 'Unknown' }}</div>
+            <div *ngIf="o.shippingAddress.line1">{{ o.shippingAddress.line1 }}</div>
+            <div *ngIf="o.shippingAddress.line2">{{ o.shippingAddress.line2 }}</div>
+            <div>
+              <span *ngIf="o.shippingAddress.city">{{ o.shippingAddress.city }}, </span>
+              <span *ngIf="o.shippingAddress.postalCode">{{ o.shippingAddress.postalCode }}, </span>
+              <span *ngIf="o.shippingAddress.country">{{ o.shippingAddress.country }}</span>
+            </div>
+            <div *ngIf="o.shippingAddress.phone">Phone: {{ o.shippingAddress.phone }}</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-outline-danger me-auto"
+                (click)="cancelCurrentOrder()"
+                [disabled]="checkoutLoading">
+          Cancel this order
+        </button>
+
+        <button class="btn btn-outline-secondary" data-bs-dismiss="modal"
+                [disabled]="checkoutLoading">
+          Back
+        </button>
+
+        <button class="btn btn-dark"
+                (click)="startStripeCheckout()"
+                [disabled]="checkoutLoading">
+          <ng-container *ngIf="!checkoutLoading">
+            Checkout &amp; pay
+          </ng-container>
+          <ng-container *ngIf="checkoutLoading">
+            <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+            Processing...
+          </ng-container>
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<app-footer></app-footer>

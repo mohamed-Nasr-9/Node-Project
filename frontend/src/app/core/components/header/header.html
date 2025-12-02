@@ -1,0 +1,63 @@
+<div class="border-bottom small text-muted">
+  <div class="container d-flex justify-content-between py-1">
+    <div class="fs-6">Need any help? Call us <strong>01093989570</strong></div>
+    <div class="d-none d-md-block fs-6"> sale discount <a href="#" class="text-decoration-underline">Shop Now</a></div>
+    <div class="fs-6">2-3 business days delivery & free returns</div>
+  </div>
+</div>
+
+<!-- nav bar -->
+<header class="py-3">
+  <div class="container d-flex align-items-center">
+    <!-- logo -->
+    <a class="d-flex align-items-center text-decoration-none me-4" href="/">
+      <div class="logo-box me-2">B</div>
+      <span class="fs-2 fw-bold"><span class="text-dark">ook</span><span class="brand">ly</span></span>
+    </a>
+
+    <!-- links -->
+    <nav class="d-none d-lg-flex align-items-center justify-content-center gap-5 flex-grow-1">
+      <a class="nav-link px-2 fs-5 fw-semibold" routerLink="/">HOME</a>
+      <a class="nav-link px-2 fs-5 fw-semibold" routerLink="/about">ABOUT</a>
+      <a class="nav-link px-2 fs-5 fw-semibold" (click)="scrollToShop(); $event.preventDefault()" style="cursor: pointer;">SHOP</a>
+      <a class="nav-link px-2 fs-5 fw-semibold" routerLink="/contact">CONTACT</a>
+    </nav>
+
+    <!-- icons-->
+    <div class="ms-auto d-flex align-items-center gap-3">
+      <!-- Dashboard Icon (only for admin users) -->
+      <a *ngIf="isAdmin" 
+         class="bi bi-speedometer2 fs-4 text-dark" 
+         style="cursor: pointer; text-decoration: none;"
+         title="Dashboard"
+         routerLink="/dashboard">
+      </a>
+      <!-- Author Profile Icon (only for approved authors) -->
+      <a *ngIf="isAuthor && !isLoadingAuthor" 
+         class="bi bi-person-badge fs-4 text-dark" 
+         style="cursor: pointer; text-decoration: none;"
+         title="Author Profile"
+         routerLink="/author-profile">
+      </a>
+      <!-- User Profile Icon (when logged in) -->
+      <a *ngIf="isAuthenticated" 
+         class="bi bi-person-circle fs-4 text-dark" 
+         style="cursor: pointer; text-decoration: none;"
+         title="User Profile"
+         routerLink="/account/user-profile">
+      </a>
+      <!-- Login Icon (when not logged in) -->
+      <a *ngIf="!isAuthenticated" 
+         class="bi bi-person fs-4 text-dark" 
+         style="cursor: pointer; text-decoration: none;"
+         title="Login"
+         routerLink="/login">
+      </a>
+      <button mat-icon-button routerLink="/cart" 
+              [matBadge]="cartService.cartCount$ | async" 
+              matBadgeColor="warn">
+        <mat-icon>shopping_cart</mat-icon>
+      </button>
+    </div>
+  </div>
+</header>

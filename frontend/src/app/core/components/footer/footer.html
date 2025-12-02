@@ -1,0 +1,66 @@
+<footer class="border-top mt-4">
+  <div class="container py-5">
+    <div class="row g-4">
+      <div class="col-12 col-lg-4">
+        <div class="d-flex align-items-center mb-3">
+          <div class="logo-box me-2">B</div>
+          <span class="fs-3 fw-bold"><span class="text-dark">ook</span><span class="brand">ly</span></span>
+        </div>
+        <p class="text-muted mb-3 fs-6">
+          Nisi, purus vitae, ultrices nunc. Sit ac sit suscipit hendrerit.
+          Gravida massa volutpat aenean odio erat nullam fringilla.
+        </p>
+        <div class="d-flex gap-3 text-muted fs-4">
+          <a class="bi bi-facebook text-dark" href="#"></a>
+          <a class="bi bi-instagram text-dark" href="#"></a>
+          <a class="bi bi-twitter-x text-dark" href="#"></a>
+          <a class="bi bi-linkedin text-dark" href="#"></a>
+          <a class="bi bi-youtube text-dark" href="#"></a>
+        </div>
+      </div>
+
+      <div class="col-6 col-lg-3">
+        <h6 class="mb-3 fs-5">Quick Links</h6>
+        <ul class="list-unstyled text-muted">
+          <li><a class="text-reset text-decoration-none fs-6" href="#">Home</a></li>
+          <li><a class="text-reset text-decoration-none fs-6" href="#">About</a></li>
+          <li><a class="text-reset text-decoration-none fs-6" href="#">Shop</a></li>
+          <li><a class="text-reset text-decoration-none fs-6" href="#">Contact</a></li>
+        </ul>
+      </div>
+
+      <div class="col-6 col-lg-3">
+        <h6 class="mb-3 fs-5">Help & Info Help</h6>
+        <ul class="list-unstyled text-muted">
+          <li><a class="text-reset text-decoration-none fs-6" href="#">Track Your Order</a></li>
+          <li><a class="text-reset text-decoration-none fs-6" href="#">Returns Policies</a></li>
+          <li><a class="text-reset text-decoration-none fs-6" href="#">Shipping + Delivery</a></li>
+          <li><a class="text-reset text-decoration-none fs-6" href="#">Contact Us</a></li>
+          <li><a class="text-reset text-decoration-none fs-6" href="#">Faqs</a></li>
+        </ul>
+      </div>
+
+      <div class="col-6 col-lg-3" *ngIf="categories.length > 0">
+        <h6 class="mb-3 fs-5">Categories</h6>
+        <ul class="list-unstyled text-muted mb-0">
+          <li *ngFor="let category of categories">
+            <a class="text-reset text-decoration-none fs-6" href="#">{{ category.name }}</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="col-12 col-lg-2">
+        <h6 class="mb-3 fs-5">Contact Us</h6>
+        <div class="text-muted">
+          <div class="fs-6">Do you have any queries or suggestions?</div>
+          <a class="text-reset fs-6" href="mailto:12alidawood@gmail.com">12alidawood@gmail.com</a><br><br>
+          <div class="fs-6">If you need support? Just give us a call.</div>
+          <a class="text-reset fs-6" href="tel:+01093989570">01093989570</a>
+        </div>
+      </div>
+    </div>
+    <div class="text-center pt-3 border-top border-secondary small text-muted">
+      <p class="mb-0">&copy; 2025 Bookly. All Rights Reserved.</p>
+    </div>
+  </div>
+</footer>

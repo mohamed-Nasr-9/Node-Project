@@ -1,0 +1,110 @@
+<app-header></app-header>
+
+<div class="become-author-container py-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-8 col-lg-6">
+        <div class="card shadow-sm">
+          <div class="card-header bg-danger text-white">
+            <h2 class="mb-0"><i class="bi bi-person-plus"></i> Become an Author</h2>
+          </div>
+          <div class="card-body p-4">
+            <!-- Existing Application Notice -->
+            <div *ngIf="existingApplication" class="alert alert-info" role="alert">
+              <h5 class="alert-heading">Application Status</h5>
+              <p class="mb-2">You have already submitted an application.</p>
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <strong>Status:</strong>
+                <span class="badge" [ngClass]="{
+                  'bg-warning': existingApplication.status === 'pending',
+                  'bg-success': existingApplication.status === 'approved',
+                  'bg-danger': existingApplication.status === 'rejected' || existingApplication.status === 'revoked'
+                }">
+                  {{ existingApplication.status?.toUpperCase() }}
+                </span>
+              </div>
+              <div *ngIf="existingApplication.appliedAt" class="mb-2">
+                <strong>Applied:</strong> {{ existingApplication.appliedAt | date:'short' }}
+              </div>
+              <div *ngIf="existingApplication.reason" class="mb-2">
+                <strong>Reason:</strong> {{ existingApplication.reason }}
+              </div>
+              <hr>
+              <p class="mb-0">
+                <strong>Name:</strong> {{ existingApplication.name }}<br>
+                <strong>Bio:</strong> {{ existingApplication.bio || 'No bio provided' }}
+              </p>
+            </div>
+
+            <!-- Success Message -->
+            <div *ngIf="success" class="alert alert-success" role="alert">
+              <h5 class="alert-heading">Application Submitted!</h5>
+              <p>Your application has been submitted successfully. An admin will review it soon.</p>
+            </div>
+
+            <!-- Error Message -->
+            <div *ngIf="error" class="alert alert-danger" role="alert">
+              {{ error }}
+            </div>
+
+            <!-- Application Form -->
+            <form *ngIf="!existingApplication || existingApplication.status === 'rejected'" (ngSubmit)="onSubmit()">
+              <div class="mb-3">
+                <label for="name" class="form-label">Author Name <span class="text-danger">*</span></label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  id="name" 
+                  [(ngModel)]="formData.name" 
+                  name="name"
+                  required
+                  minlength="2"
+                  maxlength="80"
+                  placeholder="Enter your author name">
+                <div class="form-text">This will be your public author name (2-80 characters)</div>
+              </div>
+
+              <div class="mb-3">
+                <label for="bio" class="form-label">Bio</label>
+                <textarea 
+                  class="form-control" 
+                  id="bio" 
+                  rows="5"
+                  [(ngModel)]="formData.bio" 
+                  name="bio"
+                  maxlength="2000"
+                  placeholder="Tell us about yourself as an author..."></textarea>
+                <div class="form-text">Optional. Maximum 2000 characters</div>
+              </div>
+
+              <div class="d-grid">
+                <button 
+                  type="submit" 
+                  class="btn btn-danger btn-lg" 
+                  [disabled]="loading || !authService.isAuthenticated()">
+                  <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+                  <i class="bi bi-send" *ngIf="!loading"></i>
+                  {{ loading ? 'Submitting...' : 'Submit Application' }}
+                </button>
+              </div>
+
+              <div *ngIf="!authService.isAuthenticated()" class="alert alert-warning mt-3" role="alert">
+                <i class="bi bi-exclamation-triangle"></i> Please log in to submit an application.
+              </div>
+            </form>
+
+            <!-- View Profile Link -->
+            <div *ngIf="existingApplication && existingApplication.status === 'approved'" class="mt-3">
+              <a href="/author-profile" class="btn btn-outline-danger">
+                <i class="bi bi-person-badge"></i> Go to Author Profile
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-footer [categories]="[]"></app-footer>
+

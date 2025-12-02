@@ -1,0 +1,101 @@
+<!-- Login Section -->
+<section class="login-section py-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+        <mat-card class="login-card shadow-lg">
+          <div class="login-card-header">
+            <div class="logo-box mb-3">B</div>
+            <h2 class="login-title">Welcome Back</h2>
+            <p class="login-subtitle">Sign in to your account to continue</p>
+          </div>
+
+          <form (ngSubmit)="onSubmit()" #loginForm="ngForm" class="login-form">
+            <div *ngIf="expiredMessage" class="expired-message alert alert-warning">
+              <i class="bi bi-clock-history me-2"></i>
+              {{ expiredMessage }}
+            </div>
+            <div *ngIf="errorMessage" class="error-message">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>
+              {{ errorMessage }}
+            </div>
+
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Email Address</mat-label>
+              <input 
+                matInput 
+                type="email" 
+                [(ngModel)]="email" 
+                name="email" 
+                required
+                placeholder="Enter your email">
+              <mat-icon matPrefix>email</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Password</mat-label>
+              <input 
+                matInput 
+                [type]="hidePassword ? 'password' : 'text'"
+                [(ngModel)]="password" 
+                name="password" 
+                required
+                placeholder="Enter your password">
+              <mat-icon matPrefix>lock</mat-icon>
+              <button 
+                mat-icon-button 
+                matSuffix 
+                (click)="hidePassword = !hidePassword"
+                type="button"
+                [attr.aria-label]="'Hide password'"
+                [attr.aria-pressed]="hidePassword">
+                <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+              </button>
+            </mat-form-field>
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <mat-checkbox [(ngModel)]="rememberMe" name="rememberMe">
+                Remember me
+              </mat-checkbox>
+              <a routerLink="/forgot-password" class="forgot-password-link">Forgot password?</a>
+            </div>
+
+            <button 
+              mat-raised-button 
+              color="primary" 
+              class="login-btn w-100" 
+              type="submit" 
+              [disabled]="isLoading || !loginForm.form.valid">
+              <span *ngIf="!isLoading">
+                <i class="bi bi-box-arrow-in-right me-2"></i>
+                Sign In
+              </span>
+              <span *ngIf="isLoading">
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Signing in...
+              </span>
+            </button>
+
+            <div class="divider my-4">
+              <span>or</span>
+            </div>
+
+            <p class="switch-text text-center">
+              Don't have an account?
+              <a routerLink="/register" class="register-link">Create one here</a>
+            </p>
+
+            <div class="text-center mt-3">
+              <a routerLink="/" class="home-link">
+                <i class="bi bi-arrow-left me-2"></i>
+                Back to Home
+              </a>
+            </div>
+          </form>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+</section>
+
+

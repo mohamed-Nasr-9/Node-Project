@@ -1,7 +1,10 @@
+import dotenv from "dotenv";
+
+dotenv.config();
+const HOST = process.env.DEPLOY_HOST || "http://localhost";
+
 export const notFound = (req, res, next) => {
-    const error = new Error(`Not Found - ${req.originalUrl}`);
-    res.status(404);
-    next(error);
+    res.redirect(HOST);
 };
 
 export const errorHandler = (err, req, res, next) => {

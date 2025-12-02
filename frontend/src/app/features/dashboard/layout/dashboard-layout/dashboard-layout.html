@@ -1,0 +1,21 @@
+<mat-sidenav-container class="shell body-grad">
+  <mat-sidenav #sidenav mode="side" opened class="side shadow-soft">
+    <app-sidebar class="app-sidebar" (click)="sidenav.mode==='over' && sidenav.close()"></app-sidebar>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <mat-toolbar class="topbar">
+      <button mat-icon-button (click)="sidenav.toggle()" class="d-inline d-md-none"><mat-icon>menu</mat-icon></button>
+      <span class="brand">Bookly Admin</span>
+      <span class="spacer"></span>
+      <a mat-icon-button routerLink="/" title="Go to Homepage" style="color: inherit;">
+        <mat-icon>home</mat-icon>
+      </a>
+      <!-- <button mat-icon-button><mat-icon>search</mat-icon></button>
+      <button mat-icon-button><mat-icon>account_circle</mat-icon></button> -->
+    </mat-toolbar>
+
+    <main class="content"><div class="page-enter"><router-outlet></router-outlet></div></main>
+  </mat-sidenav-content>
+</mat-sidenav-container>
+

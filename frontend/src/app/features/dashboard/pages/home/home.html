@@ -1,0 +1,137 @@
+<h2 class="mb-3">Analysis</h2>
+
+<!-- KPIs -->
+<div class="row g-3 mb-3">
+  <div class="col-6 col-lg-3">
+    <div class="card card-glass p-3 shadow-soft">
+      <div class="text-muted small">Total Orders</div>
+      <div class="h4 m-0">1,248</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card card-glass p-3 shadow-soft">
+      <div class="text-muted small">Revenue</div>
+      <div class="h4 m-0">12,560 EGP</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card card-glass p-3 shadow-soft">
+      <div class="text-muted small">Avg. Order</div>
+      <div class="h4 m-0">28.6 EGP</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card card-glass p-3 shadow-soft">
+      <div class="text-muted small">Returning Users</div>
+      <div class="h4 m-0">38%</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <!-- Bar chart -->
+  <div class="col-12 col-lg-6">
+    <div class="card card-glass p-3 shadow-soft">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <strong>Orders / Week</strong>
+        <div class="text-muted small">Static sample</div>
+      </div>
+
+      <div class="barchart">
+        <!-- السطور تحت ثابتة: غيّر العروض inline لو عايز أرقام مختلفة -->
+        <div class="bar" style="height: 46%"><span>Mon</span></div>
+        <div class="bar" style="height: 72%"><span>Tue</span></div>
+        <div class="bar" style="height: 64%"><span>Wed</span></div>
+        <div class="bar" style="height: 88%"><span>Thu</span></div>
+        <div class="bar" style="height: 53%"><span>Fri</span></div>
+        <div class="bar" style="height: 30%"><span>Sat</span></div>
+        <div class="bar" style="height: 40%"><span>Sun</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Line chart (SVG) -->
+  <div class="col-12 col-lg-6">
+    <div class="card card-glass p-3 shadow-soft">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <strong>Revenue (last 10 days)</strong>
+        <div class="text-muted small">Static sample</div>
+      </div>
+
+      <div class="linechart">
+        <svg viewBox="0 0 300 120" preserveAspectRatio="none">
+          <!-- grid -->
+          <g stroke="rgba(0,0,0,.06)" stroke-width="1">
+            <line x1="0" y1="100" x2="300" y2="100"/>
+            <line x1="0" y1="75"  x2="300" y2="75"/>
+            <line x1="0" y1="50"  x2="300" y2="50"/>
+            <line x1="0" y1="25"  x2="300" y2="25"/>
+          </g>
+          <!-- area -->
+          <path d="M0,95 L30,90 L60,80 L90,86 L120,70 L150,60 L180,65 L210,50 L240,62 L270,55 L300,58 L300,120 L0,120 Z"
+                fill="rgba(255,90,122,.20)"/>
+          <!-- line -->
+          <path d="M0,95 L30,90 L60,80 L90,86 L120,70 L150,60 L180,65 L210,50 L240,62 L270,55 L300,58"
+                fill="none" stroke="#ff5a7a" stroke-width="2.5" />
+          <!-- dots -->
+          <g fill="#ff5a7a">
+            <circle cx="60" cy="80" r="3"/><circle cx="120" cy="70" r="3"/>
+            <circle cx="150" cy="60" r="3"/><circle cx="210" cy="50" r="3"/>
+            <circle cx="270" cy="55" r="3"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Donut chart + breakdown -->
+  <div class="col-12 col-xl-4">
+    <div class="card card-glass p-3 shadow-soft h-100">
+      <strong class="mb-2 d-block">Orders by Status</strong>
+      <div class="d-flex align-items-center">
+        <div class="donut me-3"
+             style="--val1:40; --val2:25; --val3:20; --val4:15"></div>
+        <div class="small">
+          <div><span class="dot dot-paid"></span> Paid — 40%</div>
+          <div><span class="dot dot-pending"></span> Pending — 25%</div>
+          <div><span class="dot dot-shipping"></span> Shipping — 20%</div>
+          <div><span class="dot dot-cancelled"></span> Cancelled — 15%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top books -->
+  <div class="col-12 col-xl-8">
+    <div class="card card-glass p-3 shadow-soft h-100">
+      <strong class="mb-2 d-block">Top Books</strong>
+      <div class="table-responsive">
+        <table class="table mb-0 align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Title</th><th>Author</th><th class="text-end">Sales</th><th class="text-end">Revenue</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Design Patterns</td><td>GoF</td>
+              <td class="text-end">320</td><td class="text-end">6,400 EGP</td>
+            </tr>
+            <tr>
+              <td>Clean Code</td><td>R. Martin</td>
+              <td class="text-end">280</td><td class="text-end">5,600 EGP</td>
+            </tr>
+            <tr>
+              <td>Refactoring</td><td>M. Fowler</td>
+              <td class="text-end">190</td><td class="text-end">3,800 EGP</td>
+            </tr>
+            <tr>
+              <td>You Don't Know JS</td><td>Kyle Simpson</td>
+              <td class="text-end">160</td><td class="text-end">3,200 EGP</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

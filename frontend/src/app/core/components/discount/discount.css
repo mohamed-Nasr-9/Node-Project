@@ -1,0 +1,49 @@
+:root{
+  --brand:#ff5a7a;
+  --ink:#222;
+  --bg1:#fdf2f6; --bg2:#eef2ff;
+}
+
+.body-grad{ background: linear-gradient(135deg,var(--bg1) 0%,var(--bg2) 100%); }
+
+.brand-ink{ color: var(--brand); }
+
+
+.btn-brand{
+  background-color: var(--brand);
+  border-color: var(--brand);
+  color:#fff;
+}
+.btn-brand:hover{ filter: brightness(.95); }
+
+
+.card-glass{
+  background: rgba(255,255,255,.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,.5);
+  border-radius: 14px;
+}
+
+
+.badge-pill{
+  width:58px;height:58px;border-radius:50%;
+  display:grid;place-items:center;
+  color:#fff;font-weight:700;
+  font-size:18px;letter-spacing:.5px;
+  box-shadow:0 10px 24px rgba(0,0,0,.08);
+}
+.free-ship{ background:#16a34a; } 
+.discount { background: var(--brand); } 
+
+.hero-img{
+  max-height: 420px;
+  object-fit: contain;
+  filter: drop-shadow(0 24px 30px rgba(0,0,0,.15));
+}
+
+
+@media (max-width: 991.98px){
+  .display-5{ font-size: 2.2rem; }
+  .hero-img{ max-height: 320px; }
+}

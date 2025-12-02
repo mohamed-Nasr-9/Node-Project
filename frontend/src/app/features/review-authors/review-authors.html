@@ -1,0 +1,268 @@
+<app-header *ngIf="showHeaderFooter"></app-header>
+
+<div class="review-authors-container py-5">
+  <div class="container">
+    <div class="row mb-4">
+      <div class="col-12">
+        <h1 class="mb-4"><i class="bi bi-people"></i> Review Author Applications</h1>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label for="statusFilter" class="form-label">Filter by Status</label>
+                <select class="form-select" id="statusFilter" [(ngModel)]="filters.status" (change)="onStatusFilterChange(filters.status || 'all')">
+                  <option value="all">All Statuses</option>
+                  <option value="pending">Pending</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="revoked">Revoked</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label for="search" class="form-label">Search by Name</label>
+                <div class="input-group">
+                  <input 
+                    type="text" 
+                    class="form-control" 
+                    id="search"
+                    [(ngModel)]="filters.q"
+                    (keyup.enter)="onSearch()"
+                    placeholder="Search author name...">
+                  <button class="btn btn-danger" type="button" (click)="onSearch()">
+                    <i class="bi bi-search"></i> Search
+                  </button>
+                </div>
+              </div>
+              <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <div class="d-grid">
+                  <button class="btn btn-outline-secondary" (click)="filters.q = ''; filters.status = undefined; onSearch()">
+                    <i class="bi bi-x-circle"></i> Clear
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="text-center py-5">
+      <div class="spinner-border text-danger" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-3">Loading author applications...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error && !loading" class="alert alert-danger" role="alert">
+      <h4 class="alert-heading">Error!</h4>
+      <p>{{ error }}</p>
+    </div>
+
+    <!-- Authors Table -->
+    <div *ngIf="!loading && !error" class="row">
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-header bg-white">
+            <h3 class="mb-0">Author Applications ({{ totalAuthors }})</h3>
+          </div>
+          <div class="card-body">
+            <div *ngIf="authors.length === 0" class="text-center py-5">
+              <i class="bi bi-inbox fs-1 text-muted"></i>
+              <p class="text-muted mt-3">No author applications found.</p>
+            </div>
+
+            <div class="table-responsive" *ngIf="authors.length > 0">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>User Email</th>
+                    <th>Bio</th>
+                    <th>Status</th>
+                    <th>Applied</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let author of authors">
+                    <td><strong>{{ author.name }}</strong></td>
+                    <td>
+                      <span *ngIf="author.userId?.email">{{ author.userId.email }}</span>
+                      <span *ngIf="!author.userId?.email" class="text-muted">N/A</span>
+                    </td>
+                    <td>
+                      <span *ngIf="author.bio">{{ author.bio.substring(0, 50) }}{{ author.bio.length > 50 ? '...' : '' }}</span>
+                      <span *ngIf="!author.bio" class="text-muted">No bio</span>
+                    </td>
+                    <td>
+                      <span class="badge" [ngClass]="getStatusBadgeClass(author.status)">
+                        {{ author.status?.toUpperCase() }}
+                      </span>
+                    </td>
+                    <td>
+                      <span *ngIf="author.appliedAt">{{ author.appliedAt | date:'short' }}</span>
+                      <span *ngIf="!author.appliedAt" class="text-muted">N/A</span>
+                    </td>
+                    <td>
+                      <div class="btn-group" role="group">
+                        <button 
+                          *ngIf="author.status === 'pending'"
+                          class="btn btn-sm btn-success" 
+                          (click)="openApproveModal(author)"
+                          title="Approve">
+                          <i class="bi bi-check-circle"></i> Approve
+                        </button>
+                        <button 
+                          *ngIf="author.status === 'pending'"
+                          class="btn btn-sm btn-warning" 
+                          (click)="openRejectModal(author)"
+                          title="Reject">
+                          <i class="bi bi-x-circle"></i> Reject
+                        </button>
+                        <button 
+                          *ngIf="author.status === 'approved'"
+                          class="btn btn-sm btn-danger" 
+                          (click)="openRevokeModal(author)"
+                          title="Revoke">
+                          <i class="bi bi-person-x"></i> Revoke
+                        </button>
+                      </div>
+                      <div *ngIf="author.reason" class="mt-1">
+                        <small class="text-muted">Reason: {{ author.reason }}</small>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Pagination -->
+            <nav *ngIf="totalPages > 1" aria-label="Authors pagination" class="mt-4">
+              <ul class="pagination justify-content-center">
+                <li class="page-item" [class.disabled]="currentPage === 1">
+                  <a class="page-link" (click)="onPageChange(currentPage - 1)" style="cursor: pointer;">Previous</a>
+                </li>
+                <li class="page-item" *ngFor="let page of getPageNumbers()" [class.active]="page === currentPage">
+                  <a class="page-link" (click)="onPageChange(page)" style="cursor: pointer;">{{ page }}</a>
+                </li>
+                <li class="page-item" [class.disabled]="currentPage === totalPages">
+                  <a class="page-link" (click)="onPageChange(currentPage + 1)" style="cursor: pointer;">Next</a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Approve Modal -->
+<div class="modal fade" [class.show]="showApproveModal" [style.display]="showApproveModal ? 'block' : 'none'" 
+     tabindex="-1" *ngIf="showApproveModal" style="background-color: rgba(0,0,0,0.5);">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title"><i class="bi bi-check-circle"></i> Approve Author</h5>
+        <button type="button" class="btn-close btn-close-white" (click)="closeModals()" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to approve <strong>{{ selectedAuthor?.name }}</strong> as an author?</p>
+        <p class="text-muted">You can optionally update the name and bio before approving.</p>
+        
+        <div class="mb-3">
+          <label for="approveName" class="form-label">Author Name</label>
+          <input type="text" class="form-control" id="approveName" [(ngModel)]="approveData.name">
+        </div>
+        
+        <div class="mb-3">
+          <label for="approveBio" class="form-label">Bio</label>
+          <textarea class="form-control" id="approveBio" rows="3" [(ngModel)]="approveData.bio"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModals()">Cancel</button>
+        <button type="button" class="btn btn-success" (click)="approveAuthor()">
+          <i class="bi bi-check-circle"></i> Approve
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Reject Modal -->
+<div class="modal fade" [class.show]="showRejectModal" [style.display]="showRejectModal ? 'block' : 'none'" 
+     tabindex="-1" *ngIf="showRejectModal" style="background-color: rgba(0,0,0,0.5);">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title"><i class="bi bi-x-circle"></i> Reject Author</h5>
+        <button type="button" class="btn-close" (click)="closeModals()" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to reject <strong>{{ selectedAuthor?.name }}</strong>'s application?</p>
+        
+        <div class="mb-3">
+          <label for="rejectReason" class="form-label">Rejection Reason (Optional)</label>
+          <textarea 
+            class="form-control" 
+            id="rejectReason" 
+            rows="3"
+            [(ngModel)]="rejectReason"
+            placeholder="Enter reason for rejection..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModals()">Cancel</button>
+        <button type="button" class="btn btn-warning" (click)="rejectAuthor()">
+          <i class="bi bi-x-circle"></i> Reject
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Revoke Modal -->
+<div class="modal fade" [class.show]="showRevokeModal" [style.display]="showRevokeModal ? 'block' : 'none'" 
+     tabindex="-1" *ngIf="showRevokeModal" style="background-color: rgba(0,0,0,0.5);">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title"><i class="bi bi-person-x"></i> Revoke Author</h5>
+        <button type="button" class="btn-close btn-close-white" (click)="closeModals()" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to revoke <strong>{{ selectedAuthor?.name }}</strong>'s author privileges?</p>
+        <p class="text-danger"><strong>This will downgrade the user back to a regular user role.</strong></p>
+        
+        <div class="mb-3">
+          <label for="revokeReason" class="form-label">Revocation Reason (Optional)</label>
+          <textarea 
+            class="form-control" 
+            id="revokeReason" 
+            rows="3"
+            [(ngModel)]="revokeReason"
+            placeholder="Enter reason for revocation..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModals()">Cancel</button>
+        <button type="button" class="btn btn-danger" (click)="revokeAuthor()">
+          <i class="bi bi-person-x"></i> Revoke
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-footer *ngIf="showHeaderFooter" [categories]="[]"></app-footer>
+

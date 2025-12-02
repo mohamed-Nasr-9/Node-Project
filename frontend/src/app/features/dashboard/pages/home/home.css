@@ -1,0 +1,41 @@
+/* Bar chart */
+.barchart{
+  display:flex; gap:10px; align-items:flex-end;
+  height:180px; padding:10px; border-radius:10px;
+  background: rgba(0,0,0,.04);
+}
+.barchart .bar{
+  flex:1; display:flex; flex-direction:column; justify-content:flex-end; align-items:center;
+}
+.barchart .bar::before{
+  content:''; width:22px; border-radius:6px 6px 0 0;
+  background:#ff5a7a; /* pink bars */
+  display:block; height:100%;
+  box-shadow:0 6px 18px rgba(255,90,122,.25);
+}
+.barchart .bar span{ margin-top:6px; font-size:12px; color:#666; }
+
+/* Line chart */
+.linechart svg{ width:100%; height:220px; display:block; border-radius:10px; background:rgba(0,0,0,.04); }
+
+/* Donut chart (conic-gradient) */
+.donut{
+  --paid:       calc(var(--val1) * 1%); /* 0..100 */
+  --pending:    calc(var(--val2) * 1%);
+  --shipping:   calc(var(--val3) * 1%);
+  --cancelled:  calc(var(--val4) * 1%);
+  width:120px; height:120px; border-radius:50%;
+  background:
+    conic-gradient(#28a745 var(--paid),
+                   #ffc107 0 calc(var(--paid) + var(--pending)),
+                   #0dcaf0 0 calc(var(--paid) + var(--pending) + var(--shipping)),
+                   #dc3545 0);
+  position:relative;
+  box-shadow:0 6px 24px rgba(0,0,0,.08);
+}
+.donut::after{
+  content:''; position:absolute; inset:18px; border-radius:50%; background:#fff8;
+  backdrop-filter: blur(4px);
+}
+.dot{display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px;}
+.dot-paid{background:#28a745}.dot-pending{background:#ffc107}.dot-shipping{background:#0dcaf0}.dot-cancelled{background:#dc3545}

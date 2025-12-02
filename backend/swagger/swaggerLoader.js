@@ -21,7 +21,7 @@ const loadSwagger = (app) => {
       const specsFile = readFileSync(filePath, "utf8");
       const swaggerDoc = yaml.load(specsFile);
 
-      app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDoc));
+      app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDoc));
       winstonLogger.info(`Serving the endpoint of Swagger UI at : ${HOST}:${PORT}/api-docs`);
 
     } catch (error) {

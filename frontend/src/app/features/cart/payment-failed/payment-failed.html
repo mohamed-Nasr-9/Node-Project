@@ -1,0 +1,18 @@
+<app-header></app-header>
+
+<div class="container py-5 text-center">
+  <h2 class="text-danger mb-3">Payment Failed</h2>
+  <p>Unfortunately, your payment could not be completed.</p>
+
+  <p class="text-muted mb-4">
+    You will be redirected to the homepage in {{ seconds }} seconds...
+  </p>
+
+  <button class="btn btn-outline-dark" (click)="goHomeNow()">
+    Go to homepage now
+  </button>
+</div>
+
+<app-footer></app-footer>
+ 
+ 

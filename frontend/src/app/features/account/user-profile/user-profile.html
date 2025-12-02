@@ -1,0 +1,828 @@
+<div class="profile-section" *ngIf="!isLoading || user">
+  <div class="container">
+    <div class="row g-4">
+      <!-- Sidebar Navigation -->
+      <aside class="col-md-3 col-lg-3">
+        <mat-card class="sidebar-card h-100 sticky-top">
+          <div class="sidebar-header">
+            <h2 class="sidebar-title">My Account</h2>
+          </div>
+          <mat-nav-list>
+            <a mat-list-item [class.active]="activeSection === 'profile'" (click)="setActiveSection('profile')">
+              <mat-icon matListItemIcon>person</mat-icon>
+              <span matListItemTitle>User Profile</span>
+            </a>
+            <a mat-list-item [class.active]="activeSection === 'cart'" (click)="setActiveSection('cart')">
+              <mat-icon matListItemIcon>shopping_cart</mat-icon>
+              <span matListItemTitle>My Cart</span>
+            </a>
+            <a mat-list-item [class.active]="activeSection === 'orders'" (click)="setActiveSection('orders')">
+              <mat-icon matListItemIcon>receipt</mat-icon>
+              <span matListItemTitle>My Orders</span>
+            </a>
+            <a mat-list-item [class.active]="activeSection === 'library'" (click)="setActiveSection('library')">
+              <mat-icon matListItemIcon>library_books</mat-icon>
+              <span matListItemTitle>My Library</span>
+            </a>
+            <a mat-list-item [class.active]="activeSection === 'author'" (click)="setActiveSection('author')">
+              <mat-icon matListItemIcon>edit</mat-icon>
+              <span matListItemTitle>Become Author</span>
+            </a>
+            <a mat-list-item [class.active]="activeSection === 'addresses'" (click)="setActiveSection('addresses')">
+              <mat-icon matListItemIcon>location_on</mat-icon>
+              <span matListItemTitle>My Addresses</span>
+            </a>
+            <mat-divider class="my-2"></mat-divider>
+            <a mat-list-item class="text-danger" (click)="logout()">
+              <mat-icon matListItemIcon>logout</mat-icon>
+              <span matListItemTitle>Logout</span>
+            </a>
+          </mat-nav-list>
+        </mat-card>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="col-md-9 col-lg-9">
+        <mat-card class="content-card">
+          <div class="content-header">
+            <h2 class="content-title" *ngIf="activeSection === 'profile'">User Profile</h2>
+            <h2 class="content-title" *ngIf="activeSection === 'cart'">My Cart</h2>
+            <h2 class="content-title" *ngIf="activeSection === 'orders'">My Orders</h2>
+            <h2 class="content-title" *ngIf="activeSection === 'library'">My Library</h2>
+            <h2 class="content-title" *ngIf="activeSection === 'author'">Become Author</h2>
+            <h2 class="content-title" *ngIf="activeSection === 'addresses'">My Addresses</h2>
+          </div>
+          <div class="content-body">
+            <!-- Profile Section -->
+            <div *ngIf="activeSection === 'profile' && user">
+              <div *ngIf="!isEditMode" class="d-flex flex-column gap-3">
+                <!-- Field Template -->
+                <ng-template #fieldItem let-field="field" let-label="label" let-type="type">
+                  <div class="field-card">
+                    <div class="p-3">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="field-label">{{ label }}:</label>
+                        <button mat-icon-button *ngIf="editingField !== field" (click)="startEditField(field)" title="Edit {{ label }}">
+                          <mat-icon>edit</mat-icon>
+                        </button>
+                      </div>
+                      <div *ngIf="editingField !== field" class="field-value">
+                        {{ type === 'email' ? user.email : user[field] }}
+                        <span *ngIf="type === 'email' && user.isVerified" class="badge bg-success ms-2">✓ Verified</span>
+                        <span *ngIf="type === 'email' && !user.isVerified" class="badge bg-warning text-dark ms-2">⚠ Unverified</span>
+                      </div>
+                      <form [formGroup]="fieldForms[field]" *ngIf="editingField === field" class="mt-3 d-flex flex-column gap-2">
+                        <mat-form-field appearance="outline" class="w-100">
+                          <mat-label>{{ label }}</mat-label>
+                          <input matInput [type]="type || 'text'" [formControlName]="field" />
+                          <mat-error *ngIf="fieldForms[field].get(field)?.errors?.['required']">{{ label }} is required.</mat-error>
+                          <mat-error *ngIf="fieldForms[field].get(field)?.errors?.['email']">Enter a valid email.</mat-error>
+                        </mat-form-field>
+                        <div class="d-flex gap-2">
+                          <button mat-raised-button color="primary" type="button" (click)="saveField(field)" [disabled]="isLoading" class="flex-fill">Save</button>
+                          <button mat-stroked-button type="button" (click)="cancelEditField()" [disabled]="isLoading" class="flex-fill">Cancel</button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </ng-template>
+
+              <!-- First Name -->
+              <ng-container *ngTemplateOutlet="fieldItem; context: { field: 'FirstName', label: 'First Name' }"></ng-container>
+
+              <!-- Last Name -->
+              <ng-container *ngTemplateOutlet="fieldItem; context: { field: 'LastName', label: 'Last Name' }"></ng-container>
+
+              <!-- Email -->
+              <ng-container *ngTemplateOutlet="fieldItem; context: { field: 'email', label: 'Email', type: 'email' }"></ng-container>
+
+                <!-- Role (Read-only) -->
+                <div class="field-card">
+                  <div class="p-3">
+                    <label class="field-label">Role:</label>
+                    <div class="field-value">{{ user.role }}</div>
+                  </div>
+                </div>
+
+                <!-- Member Since (Read-only) -->
+                <div class="field-card">
+                  <div class="p-3">
+                    <label class="field-label">Member Since:</label>
+                    <div class="field-value">{{ user.createdAt | date:'medium' }}</div>
+                  </div>
+                </div>
+
+                <!-- Change Password -->
+                <div class="field-card">
+                  <div class="p-3">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <label class="field-label">Password:</label>
+                      <button mat-raised-button color="primary" *ngIf="!showChangePasswordForm" (click)="showChangePassword()">Change Password</button>
+                    </div>
+                    <form [formGroup]="passwordForm" *ngIf="showChangePasswordForm" (ngSubmit)="onChangePassword()" class="d-flex flex-column gap-2">
+                      <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Current Password</mat-label>
+                        <input matInput type="password" formControlName="old_password" />
+                        <mat-error *ngIf="passwordForm.get('old_password')?.errors?.['required']">Current password is required.</mat-error>
+                      </mat-form-field>
+                      <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>New Password</mat-label>
+                        <input matInput type="password" formControlName="new_password" />
+                        <mat-hint>Must be at least 8 characters with uppercase, lowercase, and number</mat-hint>
+                        <mat-error *ngIf="passwordForm.get('new_password')?.errors?.['required']">New password is required.</mat-error>
+                        <mat-error *ngIf="passwordForm.get('new_password')?.errors?.['invalidPassword']">Password must contain at least one uppercase, one lowercase, and one number, and be at least 8 characters long.</mat-error>
+                      </mat-form-field>
+                      <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Confirm New Password</mat-label>
+                        <input matInput type="password" formControlName="confirm_password" />
+                        <mat-error *ngIf="passwordForm.get('confirm_password')?.errors?.['required']">Please confirm your new password.</mat-error>
+                        <mat-error *ngIf="passwordForm.get('confirm_password')?.errors?.['passwordMismatch']">Passwords do not match.</mat-error>
+                      </mat-form-field>
+                      <div class="d-flex gap-2">
+                        <button mat-raised-button color="primary" type="submit" [disabled]="isChangingPassword" class="flex-fill">{{ isChangingPassword ? 'Changing...' : 'Change Password' }}</button>
+                        <button mat-stroked-button type="button" (click)="cancelChangePassword()" [disabled]="isChangingPassword" class="flex-fill">Cancel</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+            </div>
+
+              <!-- Edit Form -->
+              <form [formGroup]="profileForm" *ngIf="isEditMode" class="d-flex flex-column gap-3 p-4" style="background: #f8f9fa; border-radius: 12px;">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label>First Name</mat-label>
+                  <input matInput formControlName="FirstName" />
+                  <mat-error *ngIf="profileForm.get('FirstName')?.errors?.['required']">First name is required.</mat-error>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label>Last Name</mat-label>
+                  <input matInput formControlName="LastName" />
+                  <mat-error *ngIf="profileForm.get('LastName')?.errors?.['required']">Last name is required.</mat-error>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label>Email</mat-label>
+                  <input matInput type="email" formControlName="email" />
+                  <mat-error *ngIf="profileForm.get('email')?.errors?.['required']">Email is required.</mat-error>
+                  <mat-error *ngIf="profileForm.get('email')?.errors?.['email']">Enter a valid email.</mat-error>
+                </mat-form-field>
+                <div class="d-flex gap-2">
+                  <button mat-raised-button color="primary" type="button" (click)="onUpdateProfile()" class="flex-fill">Save Changes</button>
+                  <button mat-stroked-button type="button" (click)="toggleEditMode()" class="flex-fill">Cancel</button>
+                </div>
+              </form>
+
+              <!-- Delete Account Button -->
+              <div *ngIf="editingField === null && !isEditMode" class="mt-3">
+                <button mat-stroked-button color="warn" (click)="showDeleteConfirmation()" class="w-100">Delete Account</button>
+              </div>
+            </div>
+
+            <!-- Cart Section -->
+            <div *ngIf="activeSection === 'cart'">
+              <!-- Loading State -->
+              <div *ngIf="isLoadingCart" class="loading-container">
+                <mat-spinner diameter="50" class="mx-auto"></mat-spinner>
+                <p class="loading-text">Loading cart...</p>
+              </div>
+
+              <!-- Error State -->
+              <div *ngIf="cartError && !isLoadingCart" class="text-center p-4">
+                <p class="text-danger">{{ cartError }}</p>
+                <button mat-raised-button color="primary" (click)="loadCart()">Retry</button>
+              </div>
+
+              <!-- Empty Cart -->
+              <div *ngIf="!isLoadingCart && !cartError && (!cart || !cart.items || cart.items.length === 0)" class="empty-state">
+                <mat-icon class="empty-state-icon">shopping_cart</mat-icon>
+                <p class="empty-state-text">Your cart is empty</p>
+                <button mat-raised-button color="primary" routerLink="/">Start Shopping</button>
+              </div>
+
+              <!-- Cart Items -->
+              <div *ngIf="!isLoadingCart && !cartError && cart && cart.items && cart.items.length > 0" class="cart-items-container">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h3 style="margin: 0; color: var(--text-dark); font-weight: 600;">Cart Items ({{ cart.items.length }})</h3>
+                  <button mat-raised-button color="primary" (click)="goToCart()">View Full Cart</button>
+                </div>
+
+                <div class="d-flex flex-column gap-3">
+                  <mat-card *ngFor="let item of cart.items" class="cart-item-card">
+                    <div class="d-flex align-items-center gap-3 p-3">
+                      <!-- Book Image -->
+                      <div class="cart-item-image">
+                        <img 
+                          [src]="getBook(item)?.image?.url || 'https://via.placeholder.com/100x120?text=Book'" 
+                          [alt]="getBook(item)?.title || 'Book'"
+                          style="width: 100px; height: 120px; object-fit: cover; border-radius: 8px;"
+                        >
+                      </div>
+
+                      <!-- Book Details -->
+                      <div class="flex-grow-1">
+                        <h4 style="margin: 0 0 0.5rem 0; color: var(--text-dark); font-weight: 600;">
+                          {{ getBook(item)?.title || 'Unknown Book' }}
+                        </h4>
+                        <p style="margin: 0 0 0.5rem 0; color: var(--text-muted); font-size: 0.9rem;">
+                          by {{ getBook(item)?.author || 'Unknown Author' }}
+                        </p>
+                        <p style="margin: 0; color: var(--brand); font-weight: 600; font-size: 1.1rem;">
+                          {{ item.priceAtAdd }} EGP × {{ item.qty }} = {{ getItemTotal(item) }} EGP
+                        </p>
+                        <div class="mt-2" *ngIf="item.isInStock !== undefined">
+                          <span [class]="item.isInStock ? 'badge bg-success' : 'badge bg-warning'">
+                            {{ item.isInStock ? 'In Stock' : 'Out of Stock' }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </mat-card>
+                </div>
+
+                <!-- Cart Summary -->
+                <mat-card class="mt-3" style="background: #f8f9fa;">
+                  <div class="p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <span style="font-weight: 600; color: var(--text-dark);">Subtotal:</span>
+                      <span style="font-weight: 700; color: var(--brand); font-size: 1.25rem;">
+                        {{ cart.totals.subTotal || 0 }} EGP
+                      </span>
+                    </div>
+                  </div>
+                </mat-card>
+              </div>
+            </div>
+
+            <!-- Orders Section -->
+            <div *ngIf="activeSection === 'orders'">
+              <!-- Loading State -->
+              <div *ngIf="isLoadingOrders" class="loading-container">
+                <mat-spinner diameter="50" class="mx-auto"></mat-spinner>
+                <p class="loading-text">Loading orders...</p>
+              </div>
+
+              <!-- Error State -->
+              <div *ngIf="ordersError && !isLoadingOrders" class="text-center p-4">
+                <p class="text-danger">{{ ordersError }}</p>
+                <button mat-raised-button color="primary" (click)="loadOrders()">Retry</button>
+              </div>
+
+              <!-- Empty Orders -->
+              <div *ngIf="!isLoadingOrders && !ordersError && (!orders || orders.length === 0)" class="empty-state">
+                <mat-icon class="empty-state-icon">receipt</mat-icon>
+                <p class="empty-state-text">No orders yet</p>
+                <button mat-raised-button color="primary" routerLink="/">Browse Products</button>
+              </div>
+
+              <!-- Orders List -->
+              <div *ngIf="!isLoadingOrders && !ordersError && orders && orders.length > 0" class="orders-container">
+                <div class="d-flex flex-column gap-3">
+                  <mat-card *ngFor="let order of orders" class="order-card">
+                    <div class="p-3">
+                      <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                          <h4 style="margin: 0 0 0.5rem 0; color: var(--text-dark); font-weight: 600;">
+                            Order #{{ order._id?.substring(0, 8) || 'N/A' }}
+                          </h4>
+                          <p style="margin: 0; color: var(--text-muted); font-size: 0.9rem;">
+                            Placed on {{ order.placedAt | date:'medium' }}
+                          </p>
+                        </div>
+                        <span [class]="'badge ' + getStatusBadgeClass(order.status)">
+                          {{ order.status || 'Pending' }}
+                        </span>
+                      </div>
+
+                      <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                          <p style="margin: 0; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; font-weight: 600;">
+                            Shipping Address:
+                          </p>
+                          <p style="margin: 0.25rem 0 0 0; color: var(--text-dark);">
+                            {{ order.shippingAddress?.fullName || 'N/A' }}<br>
+                            {{ order.shippingAddress?.line1 || '' }}<br>
+                            <span *ngIf="order.shippingAddress?.city || order.shippingAddress?.state">
+                              {{ order.shippingAddress?.city }}{{ order.shippingAddress?.city && order.shippingAddress?.state ? ', ' : '' }}{{ order.shippingAddress?.state }}
+                            </span>
+                          </p>
+                        </div>
+                        <div class="col-md-6">
+                          <p style="margin: 0; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; font-weight: 600;">
+                            Order Total:
+                          </p>
+                          <p style="margin: 0.25rem 0 0 0; color: var(--brand); font-weight: 700; font-size: 1.25rem;">
+                            {{ order.amounts?.grandTotal || 0 }} {{ order.currency || 'EGP' }}
+                          </p>
+                        </div>
+                      </div>
+
+                      <!-- Order Items -->
+                      <div *ngIf="order.items && order.items.length > 0" class="mt-3 pt-3" style="border-top: 1px solid #e9ecef;">
+                        <p style="margin: 0 0 0.75rem 0; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; font-weight: 600;">
+                          Items ({{ order.items.length }}):
+                        </p>
+                        <div class="d-flex flex-column gap-2">
+                          <div *ngFor="let item of order.items" class="d-flex justify-content-between align-items-center p-2" style="background: #f8f9fa; border-radius: 8px;">
+                            <div>
+                              <span style="font-weight: 600; color: var(--text-dark);">
+                                {{ item.book?.title || item.bookId || 'Unknown Book' }}
+                              </span>
+                              <span style="color: var(--text-muted); font-size: 0.9rem; margin-left: 0.5rem;">
+                                × {{ item.qty }}
+                              </span>
+                            </div>
+                            <span style="color: var(--text-dark); font-weight: 600;">
+                              {{ item.priceAtOrder || item.price || 0 }} {{ order.currency || 'EGP' }}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </mat-card>
+                </div>
+              </div>
+            </div>
+
+            <!-- Library Section -->
+            <div *ngIf="activeSection === 'library'">
+              <!-- Loading State -->
+              <div *ngIf="isLoadingLibrary" class="loading-container">
+                <mat-spinner diameter="50" class="mx-auto"></mat-spinner>
+                <p class="loading-text">Loading your library...</p>
+              </div>
+
+              <!-- Error State -->
+              <div *ngIf="libraryError && !isLoadingLibrary" class="text-center p-4">
+                <p class="text-danger">{{ libraryError }}</p>
+                <button mat-raised-button color="primary" (click)="loadLibrary()">Retry</button>
+              </div>
+
+              <!-- Empty Library -->
+              <div *ngIf="!isLoadingLibrary && !libraryError && (!purchasedBooks || purchasedBooks.length === 0)" class="empty-state">
+                <mat-icon class="empty-state-icon">library_books</mat-icon>
+                <p class="empty-state-text">Your library is empty</p>
+                <p class="text-muted">Books you purchase will appear here after payment is confirmed.</p>
+                <button mat-raised-button color="primary" routerLink="/">Browse Books</button>
+              </div>
+
+              <!-- Purchased Books Grid -->
+              <div *ngIf="!isLoadingLibrary && !libraryError && purchasedBooks && purchasedBooks.length > 0" class="library-container">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                  <h3 style="margin: 0; color: var(--text-dark); font-weight: 600;">
+                    Purchased Books ({{ purchasedBooks.length }})
+                  </h3>
+                </div>
+
+                <div class="row g-3">
+                  <div *ngFor="let item of purchasedBooks" class="col-md-6 col-lg-4">
+                    <mat-card class="library-book-card h-100">
+                      <div class="d-flex flex-column h-100">
+                        <!-- Book Image -->
+                        <div class="library-book-image-container">
+                          <img 
+                            [src]="getBookImage(item)" 
+                            [alt]="getBookTitle(item)"
+                            class="library-book-image"
+                          >
+                        </div>
+
+                        <!-- Book Details -->
+                        <div class="library-book-details p-3 flex-grow-1 d-flex flex-column">
+                          <h4 class="library-book-title">
+                            {{ getBookTitle(item) }}
+                          </h4>
+                          
+                          <p *ngIf="item.purchaseDate" class="library-purchase-date text-muted mb-2">
+                            Purchased: {{ item.purchaseDate | date:'mediumDate' }}
+                          </p>
+
+                          <!-- Download Button -->
+                          <div class="mt-auto pt-3">
+                            <button 
+                              mat-raised-button 
+                              color="primary" 
+                              class="w-100"
+                              (click)="downloadBook(item.bookId, getBookTitle(item))"
+                              [disabled]="isDownloading(item.bookId)"
+                            >
+                              <mat-icon *ngIf="!isDownloading(item.bookId)" class="me-2">download</mat-icon>
+                              <mat-spinner *ngIf="isDownloading(item.bookId)" diameter="20" class="me-2"></mat-spinner>
+                              <span>{{ isDownloading(item.bookId) ? 'Downloading...' : 'Download PDF' }}</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </mat-card>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Become Author Section -->
+            <div *ngIf="activeSection === 'author'">
+              <!-- Loading State -->
+              <div *ngIf="isLoadingAuthorStatus" class="loading-container">
+                <mat-spinner diameter="50" class="mx-auto"></mat-spinner>
+                <p class="loading-text">Loading author status...</p>
+              </div>
+
+              <!-- Author Status Display -->
+              <div *ngIf="!isLoadingAuthorStatus" class="author-status-container">
+                <!-- Approved Author -->
+                <div *ngIf="authorStatus === 'approved'" class="author-approved-card">
+                  <div class="text-center mb-4">
+                    <div class="success-icon-large mb-3">
+                      <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <h3 class="mb-2">You are an Approved Author!</h3>
+                    <p class="text-muted mb-3">You can now create and manage your books.</p>
+                    <div class="mb-3">
+                      <span class="badge fs-6 px-3 py-2" [ngClass]="getAuthorStatusBadgeClass(authorStatus)">
+                        {{ getAuthorStatusText(authorStatus) }}
+                      </span>
+                    </div>
+                    <button mat-raised-button color="primary" (click)="goToAuthorProfile()" class="mt-2">
+                      <i class="bi bi-person-badge me-2"></i>
+                      Go to Author Profile
+                    </button>
+                  </div>
+                  
+                  <mat-card *ngIf="authorProfile" class="mt-4">
+                    <div class="p-3">
+                      <h5 class="mb-3">Author Information</h5>
+                      <div class="mb-2">
+                        <strong>Name:</strong> {{ authorProfile.name }}
+                      </div>
+                      <div *ngIf="authorProfile.bio">
+                        <strong>Bio:</strong>
+                        <p class="mt-1 mb-0">{{ authorProfile.bio }}</p>
+                      </div>
+                    </div>
+                  </mat-card>
+                </div>
+
+                <!-- Pending Application -->
+                <div *ngIf="authorStatus === 'pending'" class="author-pending-card">
+                  <div class="text-center mb-4">
+                    <div class="pending-icon-large mb-3">
+                      <i class="bi bi-clock-history"></i>
+                    </div>
+                    <h3 class="mb-2">Application Under Review</h3>
+                    <p class="text-muted mb-3">Your author application is being reviewed by an admin.</p>
+                    <div class="mb-3">
+                      <span class="badge fs-6 px-3 py-2" [ngClass]="getAuthorStatusBadgeClass(authorStatus)">
+                        {{ getAuthorStatusText(authorStatus) }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <mat-card *ngIf="authorProfile" class="mt-4">
+                    <div class="p-3">
+                      <h5 class="mb-3">Your Application</h5>
+                      <div class="mb-2">
+                        <strong>Name:</strong> {{ authorProfile.name }}
+                      </div>
+                      <div *ngIf="authorProfile.bio">
+                        <strong>Bio:</strong>
+                        <p class="mt-1 mb-0">{{ authorProfile.bio }}</p>
+                      </div>
+                    </div>
+                  </mat-card>
+                </div>
+
+                <!-- Rejected Application -->
+                <div *ngIf="authorStatus === 'rejected'" class="author-rejected-card">
+                  <div class="text-center mb-4">
+                    <div class="error-icon-large mb-3">
+                      <i class="bi bi-x-circle-fill"></i>
+                    </div>
+                    <h3 class="mb-2">Application Rejected</h3>
+                    <p class="text-muted mb-3">Your author application was not approved. You can submit a new application.</p>
+                    <div class="mb-3">
+                      <span class="badge fs-6 px-3 py-2" [ngClass]="getAuthorStatusBadgeClass(authorStatus)">
+                        {{ getAuthorStatusText(authorStatus) }}
+                      </span>
+                    </div>
+                    <button mat-raised-button color="primary" (click)="showAuthorApplicationForm()" class="mt-2">
+                      <i class="bi bi-pencil-square me-2"></i>
+                      Apply Again
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Not Applied / Application Form -->
+                <div *ngIf="!authorStatus && !showAuthorForm" class="author-not-applied-card">
+                  <div class="text-center mb-4">
+                    <div class="author-icon-large mb-3">
+                      <i class="bi bi-person-badge"></i>
+                    </div>
+                    <h3 class="mb-2">Become an Author</h3>
+                    <p class="text-muted mb-4">
+                      Share your knowledge and creativity with the world! Apply to become an author and start publishing your books.
+                    </p>
+                    <button mat-raised-button color="primary" (click)="showAuthorApplicationForm()" class="mt-2">
+                      <i class="bi bi-pencil-square me-2"></i>
+                      Apply to Become Author
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Author Application Form -->
+                <div *ngIf="showAuthorForm" class="author-form-container">
+                  <mat-card>
+                    <div class="card-header p-3 border-bottom">
+                      <h4 class="mb-0">Author Application Form</h4>
+                      <p class="text-muted mb-0 small">Fill in your details to apply as an author</p>
+                    </div>
+                    <div class="card-body p-4">
+                      <form [formGroup]="authorForm" (ngSubmit)="submitAuthorApplication()" class="d-flex flex-column gap-3">
+                        <mat-form-field appearance="outline" class="w-100">
+                          <mat-label>Author Name</mat-label>
+                          <input matInput formControlName="name" placeholder="Enter your author name" />
+                          <mat-icon matPrefix>person</mat-icon>
+                          <mat-hint>This will be displayed as your author name</mat-hint>
+                          <mat-error *ngIf="authorForm.get('name')?.errors?.['required']">
+                            Author name is required.
+                          </mat-error>
+                          <mat-error *ngIf="authorForm.get('name')?.errors?.['minlength']">
+                            Name must be at least 2 characters.
+                          </mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="w-100">
+                          <mat-label>Bio</mat-label>
+                          <textarea 
+                            matInput 
+                            formControlName="bio" 
+                            rows="5"
+                            placeholder="Tell us about yourself, your writing experience, and what you plan to write about..."></textarea>
+                          <mat-hint>Minimum 10 characters. Describe your background and writing interests.</mat-hint>
+                          <mat-error *ngIf="authorForm.get('bio')?.errors?.['required']">
+                            Bio is required.
+                          </mat-error>
+                          <mat-error *ngIf="authorForm.get('bio')?.errors?.['minlength']">
+                            Bio must be at least 10 characters.
+                          </mat-error>
+                        </mat-form-field>
+
+                        <div class="d-flex gap-2 mt-2">
+                          <button 
+                            mat-raised-button 
+                            color="primary" 
+                            type="submit"
+                            [disabled]="isSubmittingAuthor || !authorForm.valid"
+                            class="flex-fill">
+                            <span *ngIf="!isSubmittingAuthor">
+                              <i class="bi bi-send me-2"></i>
+                              Submit Application
+                            </span>
+                            <span *ngIf="isSubmittingAuthor">
+                              <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                              Submitting...
+                            </span>
+                          </button>
+                          <button 
+                            mat-stroked-button 
+                            type="button"
+                            (click)="cancelAuthorForm()"
+                            [disabled]="isSubmittingAuthor"
+                            class="flex-fill">
+                            Cancel
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </mat-card>
+                </div>
+              </div>
+            </div>
+
+            <!-- Addresses Section -->
+            <div *ngIf="activeSection === 'addresses' && user">
+              <div class="d-flex justify-content-between align-items-center mb-4">
+                <button mat-raised-button color="primary" *ngIf="!showAddAddressForm && !isEditMode" (click)="showAddAddress()">+ Add Address</button>
+              </div>
+
+              <!-- Add Address Form -->
+              <form *ngIf="showAddAddressForm && !isEditMode" [formGroup]="addressForm" (ngSubmit)="onAddAddress()" class="mb-4 p-4 d-flex flex-column gap-2" style="background: #f8f9fa; border-radius: 12px;">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Label</mat-label>
+                <input matInput formControlName="label" placeholder="e.g., Home, Work" />
+                <mat-error *ngIf="addressForm.get('label')?.errors?.['required']">Label is required.</mat-error>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Full Name</mat-label>
+                <input matInput formControlName="fullName" />
+                <mat-error *ngIf="addressForm.get('fullName')?.errors?.['required']">Full name is required.</mat-error>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Phone</mat-label>
+                <input matInput formControlName="phone" type="tel" />
+                <mat-error *ngIf="addressForm.get('phone')?.errors?.['required']">Phone is required.</mat-error>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Address Line 1</mat-label>
+                <input matInput formControlName="line1" />
+                <mat-error *ngIf="addressForm.get('line1')?.errors?.['required']">Address line 1 is required.</mat-error>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Address Line 2 (Optional)</mat-label>
+                <input matInput formControlName="line2" />
+              </mat-form-field>
+              <div class="row g-2">
+                <div class="col-md-6">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>City</mat-label>
+                    <input matInput formControlName="city" />
+                    <mat-error *ngIf="addressForm.get('city')?.errors?.['required']">City is required.</mat-error>
+                  </mat-form-field>
+                </div>
+                <div class="col-md-6">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>State</mat-label>
+                    <input matInput formControlName="state" />
+                    <mat-error *ngIf="addressForm.get('state')?.errors?.['required']">State is required.</mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+              <div class="row g-2">
+                <div class="col-md-6">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Country</mat-label>
+                    <input matInput formControlName="country" />
+                    <mat-error *ngIf="addressForm.get('country')?.errors?.['required']">Country is required.</mat-error>
+                  </mat-form-field>
+                </div>
+                <div class="col-md-6">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Postal Code</mat-label>
+                    <input matInput formControlName="postalCode" />
+                    <mat-error *ngIf="addressForm.get('postalCode')?.errors?.['required']">Postal code is required.</mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+              <mat-checkbox formControlName="isDefault">Set as default address</mat-checkbox>
+              <div class="d-flex gap-2">
+                <button mat-raised-button color="primary" type="submit" [disabled]="isAddingAddress" class="flex-fill">{{ isAddingAddress ? 'Adding...' : 'Add Address' }}</button>
+                <button mat-stroked-button type="button" (click)="cancelAddAddress()" [disabled]="isAddingAddress" class="flex-fill">Cancel</button>
+              </div>
+            </form>
+
+              <!-- Addresses List -->
+              <div class="d-flex flex-column gap-3" *ngIf="user.addresses && user.addresses.length > 0">
+                <div *ngFor="let address of user.addresses; let i = index" class="address-card">
+                  <!-- Edit Address Form -->
+                  <form [formGroup]="editAddressForm" *ngIf="(editingAddressId === address._id || editingAddressId === address.id || editingAddressId === i.toString()) && !isEditMode" (ngSubmit)="onUpdateAddress()" class="p-4 d-flex flex-column gap-2">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Label</mat-label>
+                    <input matInput formControlName="label" />
+                    <mat-error *ngIf="editAddressForm.get('label')?.errors?.['required']">Label is required.</mat-error>
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Full Name</mat-label>
+                    <input matInput formControlName="fullName" />
+                    <mat-error *ngIf="editAddressForm.get('fullName')?.errors?.['required']">Full name is required.</mat-error>
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Phone</mat-label>
+                    <input matInput formControlName="phone" type="tel" />
+                    <mat-error *ngIf="editAddressForm.get('phone')?.errors?.['required']">Phone is required.</mat-error>
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Address Line 1</mat-label>
+                    <input matInput formControlName="line1" />
+                    <mat-error *ngIf="editAddressForm.get('line1')?.errors?.['required']">Address line 1 is required.</mat-error>
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Address Line 2 (Optional)</mat-label>
+                    <input matInput formControlName="line2" />
+                  </mat-form-field>
+                  <div class="row g-2">
+                    <div class="col-md-6">
+                      <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>City</mat-label>
+                        <input matInput formControlName="city" />
+                        <mat-error *ngIf="editAddressForm.get('city')?.errors?.['required']">City is required.</mat-error>
+                      </mat-form-field>
+                    </div>
+                    <div class="col-md-6">
+                      <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>State</mat-label>
+                        <input matInput formControlName="state" />
+                        <mat-error *ngIf="editAddressForm.get('state')?.errors?.['required']">State is required.</mat-error>
+                      </mat-form-field>
+                    </div>
+                  </div>
+                  <div class="row g-2">
+                    <div class="col-md-6">
+                      <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Country</mat-label>
+                        <input matInput formControlName="country" />
+                        <mat-error *ngIf="editAddressForm.get('country')?.errors?.['required']">Country is required.</mat-error>
+                      </mat-form-field>
+                    </div>
+                    <div class="col-md-6">
+                      <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Postal Code</mat-label>
+                        <input matInput formControlName="postalCode" />
+                        <mat-error *ngIf="editAddressForm.get('postalCode')?.errors?.['required']">Postal code is required.</mat-error>
+                      </mat-form-field>
+                    </div>
+                  </div>
+                  <mat-checkbox formControlName="isDefault">Set as default address</mat-checkbox>
+                  <div class="d-flex gap-2">
+                    <button mat-raised-button color="primary" type="submit" [disabled]="isUpdatingAddress" class="flex-fill">{{ isUpdatingAddress ? 'Updating...' : 'Update Address' }}</button>
+                    <button mat-stroked-button type="button" (click)="cancelEditAddress()" [disabled]="isUpdatingAddress" class="flex-fill">Cancel</button>
+                  </div>
+                </form>
+
+                  <!-- Address Display -->
+                  <div *ngIf="(editingAddressId !== address._id && editingAddressId !== address.id && editingAddressId !== i.toString()) || isEditMode" class="address-body">
+                    <div class="address-header">
+                      <div>
+                        <span class="address-label">{{ address.label || ('Address ' + (i + 1)) }}</span>
+                        <span *ngIf="address.isDefault" class="badge bg-primary ms-2">Default</span>
+                      </div>
+                      <div class="d-flex gap-1" *ngIf="!isEditMode">
+                        <button mat-icon-button (click)="showEditAddress(i)" title="Edit Address"><mat-icon>edit</mat-icon></button>
+                        <button mat-icon-button color="warn" (click)="showDeleteAddressModal(i)" title="Delete Address"><mat-icon>delete</mat-icon></button>
+                      </div>
+                    </div>
+                    <div class="d-flex flex-column gap-2">
+                      <div *ngIf="address.fullName" class="address-field"><strong>Name:</strong> {{ address.fullName }}</div>
+                      <div *ngIf="address.phone" class="address-field"><strong>Phone:</strong> {{ address.phone }}</div>
+                      <div *ngIf="address.line1" class="address-field"><strong>Address:</strong> {{ address.line1 }}</div>
+                      <div *ngIf="address.line2" class="address-field">{{ address.line2 }}</div>
+                      <div *ngIf="address.city || address.state" class="address-field"><strong>City/State:</strong> {{ address.city }}{{ address.city && address.state ? ', ' : '' }}{{ address.state }}</div>
+                      <div *ngIf="address.country" class="address-field"><strong>Country:</strong> {{ address.country }}</div>
+                      <div *ngIf="address.postalCode" class="address-field"><strong>Postal Code:</strong> {{ address.postalCode }}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="text-center p-4" style="background: #f8f9fa; border-radius: 12px;" *ngIf="!user.addresses || user.addresses.length === 0">
+                <p class="text-muted mb-0">No addresses added yet.</p>
+              </div>
+            </div>
+
+            <!-- Loading State -->
+            <div class="loading-container" *ngIf="isLoading && !user">
+              <mat-spinner diameter="50" class="mx-auto"></mat-spinner>
+              <p class="loading-text">Loading profile...</p>
+            </div>
+          </div>
+        </mat-card>
+      </main>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Address Confirmation Modal -->
+<div class="modal-overlay" *ngIf="showDeleteAddressConfirm" (click)="cancelDeleteAddress()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">Delete Address</h2>
+    </div>
+    <div class="modal-body">
+      <p class="text-muted">Are you sure you want to delete this address? This action cannot be undone.</p>
+    </div>
+    <div class="modal-actions">
+      <button mat-raised-button color="warn" (click)="onDeleteAddress()" [disabled]="isDeletingAddress" class="flex-fill">{{ isDeletingAddress ? 'Deleting...' : 'Confirm Delete' }}</button>
+      <button mat-stroked-button (click)="cancelDeleteAddress()" [disabled]="isDeletingAddress" class="flex-fill">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Account Confirmation Modal -->
+<div class="modal-overlay" *ngIf="showDeleteConfirm" (click)="cancelDelete()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">Delete Account</h2>
+    </div>
+    <div class="modal-body">
+      <p class="text-muted mb-3">This action cannot be undone. Please enter your password to confirm.</p>
+      <form [formGroup]="deleteForm" (ngSubmit)="onDeleteAccount()" class="d-flex flex-column gap-2">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Password</mat-label>
+          <input matInput type="password" formControlName="password" />
+          <mat-error *ngIf="deleteForm.get('password')?.errors?.['required']">Password is required.</mat-error>
+        </mat-form-field>
+        <div class="d-flex gap-2">
+          <button mat-raised-button color="warn" type="submit" [disabled]="isDeleting" class="flex-fill">{{ isDeleting ? 'Deleting...' : 'Confirm Delete' }}</button>
+          <button mat-stroked-button type="button" (click)="cancelDelete()" [disabled]="isDeleting" class="flex-fill">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Message Box -->
+<div class="message-overlay" *ngIf="isLoading || message">
+  <div class="message-card" [class.border-success]="!isError && !isLoading" [class.border-danger]="isError" (click)="closeMessage()">
+    <button type="button" class="close-btn" (click)="closeMessage()">×</button>
+    <div class="message-content">
+      <mat-spinner *ngIf="isLoading" diameter="48" class="mx-auto mb-3"></mat-spinner>
+      <p class="message-text" [class.text-success]="!isError && !isLoading" [class.text-danger]="isError">{{ isLoading ? 'Processing, please wait...' : message }}</p>
+    </div>
+  </div>
+</div>

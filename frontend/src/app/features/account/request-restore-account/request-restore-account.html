@@ -1,0 +1,82 @@
+<!-- Request Restore Account Section -->
+<section class="restore-section py-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+        <mat-card class="restore-card shadow-lg">
+          <div class="restore-card-header">
+            <div class="logo-box mb-3">B</div>
+            <h2 class="restore-title">Restore Your Account</h2>
+            <p class="restore-subtitle">Enter your email address to receive a restore link for your deleted account</p>
+          </div>
+
+          <form [formGroup]="restoreAccountForm" (ngSubmit)="onSubmit()" class="restore-form">
+            <!-- Email -->
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Email Address</mat-label>
+              <input matInput type="email" formControlName="email" placeholder="Enter your email" />
+              <mat-icon matPrefix>email</mat-icon>
+              <mat-error *ngIf="restoreAccountForm.get('email')?.errors?.['required']">
+                Email is required.
+              </mat-error>
+              <mat-error *ngIf="restoreAccountForm.get('email')?.errors?.['email']">
+                Enter a valid email.
+              </mat-error>
+            </mat-form-field>
+
+            <button 
+              mat-raised-button 
+              color="primary" 
+              class="restore-btn w-100" 
+              type="submit" 
+              [disabled]="isLoading || !restoreAccountForm.valid">
+              <span *ngIf="!isLoading">
+                <i class="bi bi-envelope-paper me-2"></i>
+                Send Restore Link
+              </span>
+              <span *ngIf="isLoading">
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Sending...
+              </span>
+            </button>
+
+            <div class="divider my-4">
+              <span>or</span>
+            </div>
+
+            <p class="switch-text text-center">
+              Remember your password?
+              <a routerLink="/login" class="login-link">Login here</a>
+            </p>
+
+            <div class="text-center mt-3">
+              <a routerLink="/" class="home-link">
+                <i class="bi bi-arrow-left me-2"></i>
+                Back to Home
+              </a>
+            </div>
+          </form>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Popup message/loading box -->
+<div class="message-box" *ngIf="isLoading || message">
+  <div class="backdrop"></div>
+  <div class="box-inner" [class.error]="isError" [class.success]="!isError && !isLoading">
+    <button type="button" class="close-btn" (click)="closeMessage()">×</button>
+    <div class="row">
+      <div class="spinner" *ngIf="isLoading"></div>
+      <div class="text" *ngIf="!isLoading">
+        {{ message }}
+      </div>
+      <div class="text" *ngIf="isLoading">
+        Processing, please wait...
+      </div>
+    </div>
+  </div>
+</div>
+
+

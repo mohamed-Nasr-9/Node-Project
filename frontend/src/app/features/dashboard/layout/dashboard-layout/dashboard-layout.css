@@ -1,0 +1,14 @@
+.shell{height:100vh;}
+.side{width:250px;background:#ffffffcf;border-right:1px solid rgba(0,0,0,.05);}
+.topbar{background:transparent;padding:.25rem .75rem;}
+.topbar .brand{font-weight:700;color:var(--brand);letter-spacing:.3px;}
+.topbar .spacer{flex:1 1 auto;}
+.topbar a[mat-icon-button] {
+  transition: color 0.2s ease;
+}
+.topbar a[mat-icon-button]:hover {
+  color: var(--brand) !important;
+}
+.content{padding:18px;}
+@media (max-width:768px){ .side{width:220px;} }
+

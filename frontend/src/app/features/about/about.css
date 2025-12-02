@@ -1,0 +1,25 @@
+.about-section {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: calc(100vh - 200px);
+}
+
+.card {
+  border-radius: 12px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+.display-4 {
+  color: var(--brand, #dc3545);
+}
+
+@media (max-width: 768px) {
+  .card-body {
+    padding: 2rem !important;
+  }
+}
+

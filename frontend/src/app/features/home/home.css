@@ -1,0 +1,386 @@
+/* Features Section */
+.features-section {
+  background: #fff;
+}
+
+.feature-icon {
+  color: #dc3545;
+}
+
+.feature-icon i {
+  transition: transform 0.3s ease;
+}
+
+.feature-icon:hover i {
+  transform: scale(1.1);
+}
+
+/* Best Selling Section */
+.best-selling-section {
+  background: #f8f9fa;
+}
+
+.book-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid #e9ecef;
+}
+
+.book-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1) !important;
+  border-color: #dc3545;
+}
+
+.book-image-wrapper {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.book-image-wrapper img {
+  transition: transform 0.3s ease;
+}
+
+.book-card:hover .book-image-wrapper img {
+  transform: scale(1.05);
+}
+
+.book-badge {
+  z-index: 10;
+}
+
+/* Categories section */
+.categories-section {
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 50%, #f8f9fa 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.categories-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #dc3545, #ff6b6b, #4ecdc4, #45b7d1, #dc3545);
+  background-size: 200% 100%;
+  animation: gradientShift 3s ease infinite;
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.category-title {
+  color: #2c3e50;
+  font-size: 2.5rem;
+  letter-spacing: -0.5px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  position: relative;
+  padding-bottom: 1rem;
+}
+
+.category-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(90deg, #dc3545, #ff6b6b);
+  border-radius: 2px;
+}
+
+.category-card-wrapper {
+  position: relative;
+  padding: 5px;
+}
+
+.category-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 16px !important;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.category-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  transition: left 0.5s ease;
+}
+
+.category-card:hover::before {
+  left: 100%;
+}
+
+.category-card-wrapper[data-index="0"] .category-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.category-card-wrapper[data-index="1"] .category-card {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+}
+
+.category-card-wrapper[data-index="2"] .category-card {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+}
+
+.category-card-wrapper[data-index="3"] .category-card {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  color: white;
+}
+
+.category-card-wrapper[data-index="4"] .category-card {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  color: white;
+}
+
+.category-card-wrapper[data-index="5"] .category-card {
+  background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+  color: white;
+}
+
+.category-card-wrapper[data-index="6"] .category-card {
+  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  color: #2c3e50;
+}
+
+.category-card-wrapper[data-index="7"] .category-card {
+  background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+  color: #2c3e50;
+}
+
+.category-card-wrapper[data-index="8"] .category-card {
+  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+  color: #2c3e50;
+}
+
+.category-card-wrapper[data-index="9"] .category-card {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+  color: white;
+}
+
+.category-card-wrapper[data-index="10"] .category-card {
+  background: linear-gradient(135deg, #c471ed 0%, #f64f59 100%);
+  color: white;
+}
+
+/* Additional color variations for more categories */
+.category-card-wrapper[data-index="11"] .category-card {
+  background: linear-gradient(135deg, #a8c0ff 0%, #3f2b96 100%);
+  color: white;
+}
+
+.category-card-wrapper[data-index="12"] .category-card {
+  background: linear-gradient(135deg, #fad0c4 0%, #ffd1ff 100%);
+  color: #2c3e50;
+}
+
+.category-card-wrapper[data-index="13"] .category-card {
+  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+  color: #2c3e50;
+}
+
+.category-card-wrapper[data-index="14"] .category-card {
+  background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+  color: #2c3e50;
+}
+
+/* Fallback for categories beyond defined indices - cycles through colors */
+.category-card-wrapper[data-index]:not([data-index="0"]):not([data-index="1"]):not([data-index="2"]):not([data-index="3"]):not([data-index="4"]):not([data-index="5"]):not([data-index="6"]):not([data-index="7"]):not([data-index="8"]):not([data-index="9"]):not([data-index="10"]):not([data-index="11"]):not([data-index="12"]):not([data-index="13"]):not([data-index="14"]) .category-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.category-card:hover {
+  transform: translateY(-8px) scale(1.03);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.category-card.selected {
+  border: 3px solid #dc3545 !important;
+  box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.2), 0 12px 24px rgba(0, 0, 0, 0.2) !important;
+  transform: translateY(-4px) scale(1.02);
+}
+
+.category-icon-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.category-icon {
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
+.category-card:hover .category-icon {
+  transform: scale(1.15) rotate(5deg);
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+}
+
+.category-name {
+  font-size: 0.95rem;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.category-card:hover .category-name {
+  font-weight: 700;
+  letter-spacing: 0.8px;
+}
+
+/* Responsive adjustments for categories */
+@media (max-width: 768px) {
+  .category-title {
+    font-size: 2rem;
+  }
+  
+  .category-card {
+    padding: 1.5rem 0.5rem !important;
+  }
+  
+  .category-icon {
+    font-size: 32px !important;
+  }
+  
+  .category-name {
+    font-size: 0.85rem;
+  }
+}
+
+/* Book Sections (Featured, Latest, etc.) */
+.book-sections {
+  background: #f8f9fa;
+}
+
+.book-item {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid #e9ecef;
+}
+
+.book-item:hover {
+  transform: translateX(5px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+  border-color: #dc3545;
+}
+
+/* Reviews Section */
+.reviews-section {
+  background: #fff;
+}
+
+.reviews-section .card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid #e9ecef;
+}
+
+.reviews-section .card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1) !important;
+}
+
+/* Books Section */
+.books-section {
+  background: #f8f9fa;
+}
+
+.books-section .book-card {
+  background: #fff;
+  border: 1px solid #e9ecef;
+}
+
+.books-section .book-card:hover {
+  border-color: #dc3545;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .countdown-value {
+    min-width: 60px;
+    font-size: 1.5rem;
+    padding: 1rem !important;
+  }
+
+  .book-item {
+    margin-bottom: 1rem;
+  }
+}
+
+/* General styling improvements */
+h2 {
+  color: #212529;
+  font-weight: 700;
+}
+
+.book-card h6 {
+  color: #212529;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  min-height: 2.8rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.book-card .text-muted {
+  font-size: 0.85rem;
+}
+
+.book-card .fw-bold {
+  color: #dc3545;
+  font-size: 1.1rem;
+}
+
+/* Button styling */
+.btn-danger {
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
+  border-color: #bd2130;
+}
+
+/* Pagination active state */
+.pagination .page-item.active .page-link {
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+.pagination .page-link {
+  color: #dc3545;
+}
+
+.pagination .page-link:hover {
+  color: #c82333;
+}
+
+/* Badge styling */
+.badge.bg-danger {
+  background-color: #dc3545 !important;
+}
+
+/* Form controls */
+.form-control:focus,
+.form-select:focus {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}

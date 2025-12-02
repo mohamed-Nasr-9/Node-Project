@@ -1,0 +1,34 @@
+.cart-container {
+  min-height: calc(100vh - 160px); 
+  padding: 2rem 1rem;
+}
+
+.payment-card {
+  border-radius: 16px;
+  padding: 1.5rem 1.75rem;
+}
+
+.section-title {
+  letter-spacing: 0.08em;
+}
+
+.cart-flash-message {
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.cart-flash-message.success {
+  background-color: #e6f4ea;
+  color: #1e7e34;
+}
+
+.cart-flash-message.danger {
+  background-color: #fdecea;
+  color: #b71c1c;
+}
+
+.cart-flash-message.info {
+  background-color: #e8f0fe;
+  color: #1a73e8;
+}

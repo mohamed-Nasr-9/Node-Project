@@ -1,0 +1,196 @@
+<app-header></app-header>
+
+<section class="contact-section py-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-lg-10">
+        <!-- Hero Section -->
+        <div class="text-center mb-5">
+          <h1 class="display-4 fw-bold mb-3">Contact Us</h1>
+          <p class="lead text-muted">We'd love to hear from you. Send us a message and we'll respond as soon as possible.</p>
+        </div>
+
+        <div class="row g-4">
+          <!-- Contact Form -->
+          <div class="col-12 col-lg-7">
+            <div class="card shadow-sm border-0 h-100">
+              <div class="card-body p-5">
+                <h2 class="fw-bold mb-4">Send us a Message</h2>
+                
+                <!-- Success Message -->
+                <div *ngIf="showSuccessMessage" class="alert alert-success alert-dismissible fade show d-flex align-items-center justify-content-between" role="alert">
+                  <div>
+                    <i class="bi bi-check-circle me-2"></i>
+                    Thank you for contacting us! We'll get back to you soon.
+                  </div>
+                  <button type="button" class="btn-close" (click)="showSuccessMessage = false" aria-label="Close"></button>
+                </div>
+
+                <form [formGroup]="contactForm" (ngSubmit)="onSubmit()">
+                  <!-- Name -->
+                  <div class="mb-4">
+                    <label for="name" class="form-label fw-semibold">Name <span class="text-danger">*</span></label>
+                    <input 
+                      type="text" 
+                      class="form-control" 
+                      id="name"
+                      formControlName="name"
+                      [class.is-invalid]="contactForm.get('name')?.invalid && contactForm.get('name')?.touched"
+                      placeholder="Your full name">
+                    <div class="invalid-feedback" *ngIf="contactForm.get('name')?.invalid && contactForm.get('name')?.touched">
+                      {{ getErrorMessage('name') }}
+                    </div>
+                  </div>
+
+                  <!-- Email -->
+                  <div class="mb-4">
+                    <label for="email" class="form-label fw-semibold">Email <span class="text-danger">*</span></label>
+                    <input 
+                      type="email" 
+                      class="form-control" 
+                      id="email"
+                      formControlName="email"
+                      [class.is-invalid]="contactForm.get('email')?.invalid && contactForm.get('email')?.touched"
+                      placeholder="your.email@example.com">
+                    <div class="invalid-feedback" *ngIf="contactForm.get('email')?.invalid && contactForm.get('email')?.touched">
+                      {{ getErrorMessage('email') }}
+                    </div>
+                  </div>
+
+                  <!-- Phone -->
+                  <div class="mb-4">
+                    <label for="phone" class="form-label fw-semibold">Phone <span class="text-danger">*</span></label>
+                    <input 
+                      type="tel" 
+                      class="form-control" 
+                      id="phone"
+                      formControlName="phone"
+                      [class.is-invalid]="contactForm.get('phone')?.invalid && contactForm.get('phone')?.touched"
+                      placeholder="01093989570">
+                    <div class="invalid-feedback" *ngIf="contactForm.get('phone')?.invalid && contactForm.get('phone')?.touched">
+                      {{ getErrorMessage('phone') }}
+                    </div>
+                  </div>
+
+                  <!-- Subject -->
+                  <div class="mb-4">
+                    <label for="subject" class="form-label fw-semibold">Subject <span class="text-danger">*</span></label>
+                    <input 
+                      type="text" 
+                      class="form-control" 
+                      id="subject"
+                      formControlName="subject"
+                      [class.is-invalid]="contactForm.get('subject')?.invalid && contactForm.get('subject')?.touched"
+                      placeholder="What is this regarding?">
+                    <div class="invalid-feedback" *ngIf="contactForm.get('subject')?.invalid && contactForm.get('subject')?.touched">
+                      {{ getErrorMessage('subject') }}
+                    </div>
+                  </div>
+
+                  <!-- Message -->
+                  <div class="mb-4">
+                    <label for="message" class="form-label fw-semibold">Message <span class="text-danger">*</span></label>
+                    <textarea 
+                      class="form-control" 
+                      id="message"
+                      formControlName="message"
+                      rows="5"
+                      [class.is-invalid]="contactForm.get('message')?.invalid && contactForm.get('message')?.touched"
+                      placeholder="Tell us more about your inquiry..."></textarea>
+                    <div class="invalid-feedback" *ngIf="contactForm.get('message')?.invalid && contactForm.get('message')?.touched">
+                      {{ getErrorMessage('message') }}
+                    </div>
+                  </div>
+
+                  <!-- Submit Button -->
+                  <button 
+                    type="submit" 
+                    class="btn btn-danger btn-lg w-100"
+                    [disabled]="isSubmitting || contactForm.invalid">
+                    <span *ngIf="!isSubmitting">
+                      <i class="bi bi-send me-2"></i>Send Message
+                    </span>
+                    <span *ngIf="isSubmitting">
+                      <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      Sending...
+                    </span>
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contact Information -->
+          <div class="col-12 col-lg-5">
+            <div class="card shadow-sm border-0 h-100">
+              <div class="card-body p-5">
+                <h2 class="fw-bold mb-4">Get in Touch</h2>
+                
+                <div class="mb-4">
+                  <h5 class="fw-semibold mb-3">
+                    <i class="bi bi-telephone text-danger me-2"></i>Phone
+                  </h5>
+                  <p class="text-muted mb-0">
+                    <a href="tel:01093989570" class="text-decoration-none">01093989570</a>
+                  </p>
+                </div>
+
+                <div class="mb-4">
+                  <h5 class="fw-semibold mb-3">
+                    <i class="bi bi-envelope text-danger me-2"></i>Email
+                  </h5>
+                  <p class="text-muted mb-0">
+                    <a href="mailto:support@bookly.com" class="text-decoration-none">support@bookly.com</a>
+                  </p>
+                </div>
+
+                <div class="mb-4">
+                  <h5 class="fw-semibold mb-3">
+                    <i class="bi bi-clock text-danger me-2"></i>Business Hours
+                  </h5>
+                  <p class="text-muted mb-0">Monday - Friday: 9:00 AM - 6:00 PM</p>
+                  <p class="text-muted mb-0">Saturday: 10:00 AM - 4:00 PM</p>
+                  <p class="text-muted mb-0">Sunday: Closed</p>
+                </div>
+
+                <div class="mb-4">
+                  <h5 class="fw-semibold mb-3">
+                    <i class="bi bi-geo-alt text-danger me-2"></i>Address
+                  </h5>
+                  <p class="text-muted mb-0">
+                    123 Book Street<br>
+                    Cairo, Egypt<br>
+                    Postal Code: 12345
+                  </p>
+                </div>
+
+                <div>
+                  <h5 class="fw-semibold mb-3">
+                    <i class="bi bi-share text-danger me-2"></i>Follow Us
+                  </h5>
+                  <div class="d-flex gap-3">
+                    <a href="#" class="text-danger fs-4" title="Facebook">
+                      <i class="bi bi-facebook"></i>
+                    </a>
+                    <a href="#" class="text-danger fs-4" title="Twitter">
+                      <i class="bi bi-twitter"></i>
+                    </a>
+                    <a href="#" class="text-danger fs-4" title="Instagram">
+                      <i class="bi bi-instagram"></i>
+                    </a>
+                    <a href="#" class="text-danger fs-4" title="LinkedIn">
+                      <i class="bi bi-linkedin"></i>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<app-footer></app-footer>
+

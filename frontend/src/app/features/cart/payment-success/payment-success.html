@@ -1,0 +1,118 @@
+<app-header></app-header>
+
+<div class="container py-5">
+
+  <div class="text-center mb-4">
+    <h2 class="text-success mb-2">Thank you!</h2>
+    <p>Your payment was successful and your order is being processed.</p>
+
+    <p class="text-muted">
+      Payment session ID:
+      <span class="fw-semibold">{{ sessionId || 'N/A' }}</span>
+    </p>
+
+    <p class="text-muted mb-4">
+      You can go back to the homepage anytime.
+    </p>
+
+    <button class="btn btn-outline-dark mb-4" (click)="goNow()">
+      Go to homepage now
+    </button>
+  </div>
+
+  <div *ngIf="order as o" class="card card-glass p-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+      <div>
+        <div class="small text-muted">Order ID</div>
+        <div class="fw-semibold">{{ o._id }}</div>
+      </div>
+      <div class="text-end">
+        <div class="small text-muted">Placed at</div>
+        <div>{{ o.placedAt | date:'short' }}</div>
+      </div>
+    </div>
+
+    <div class="row g-3 mb-3">
+      <div class="col-12 col-md-4">
+        <div class="border rounded p-3 h-100">
+          <div class="fw-semibold mb-2">Shipping Address</div>
+          <div class="small text-muted">
+            <div class="fw-semibold text-dark">{{ o.shippingAddress.fullName }}</div>
+            <div>Phone: {{ o.shippingAddress.phone }}</div>
+            <div>City: {{ o.shippingAddress.city }}</div>
+            <div>Country: {{ o.shippingAddress.country }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-4">
+        <div class="border rounded p-3 h-100">
+          <div class="fw-semibold mb-2">Amounts</div>
+          <div class="small">
+            <div class="d-flex justify-content-between py-1">
+              <span class="text-muted">Items total</span>
+              <span class="fw-semibold">{{ o.amounts.itemsTotal | currency:o.currency }}</span>
+            </div>
+            <div class="d-flex justify-content-between py-1">
+              <span class="text-muted">Shipping</span>
+              <span class="fw-semibold">
+                {{ o.amounts.shipping | currency:o.currency }}
+              </span>
+            </div>
+            <div class="d-flex justify-content-between py-1">
+              <span class="text-muted">Discount</span>
+              <span class="fw-semibold text-danger">
+                -{{ o.amounts.discount | currency:o.currency }}
+              </span>
+            </div>
+            <hr class="my-2">
+            <div class="d-flex justify-content-between py-1">
+              <span class="fw-semibold">Grand total</span>
+              <span class="fw-bold">{{ o.amounts.grandTotal | currency:o.currency }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-4">
+        <div class="border rounded p-3 h-100">
+          <div class="fw-semibold mb-2">Status</div>
+          <div class="small">
+            <span class="badge bg-success-subtle text-success">
+              {{ o.status | titlecase }}
+            </span>
+            <div class="text-muted mt-2">
+              Thank you for your purchase!<br>
+              You will receive an email with the order details.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-sm align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Item (bookId)</th>
+            <th class="text-end">Qty</th>
+            <th class="text-end">Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let it of o.items">
+            <td class="text-break">{{ it.bookId }}</td>
+            <td class="text-end">{{ it.qty }}</td>
+            <td class="text-end">{{ it.priceAtAdd | currency:o.currency }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div *ngIf="!order" class="text-center text-muted">
+    No order details available.
+  </div>
+</div>
+
+<app-footer></app-footer>

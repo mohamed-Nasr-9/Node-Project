@@ -1,0 +1,12 @@
+.tall-modal { max-width: 520px; }        
+.tall-modal .modal-content { min-height: 80vh; } 
+
+
+@media (min-width: 992px){
+  .tall-modal { max-width: 480px; }
+}
+
+
+.modal-backdrop { display: none !important; }
+
+
